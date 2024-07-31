@@ -1,2 +1,2 @@
 # Proxy-Messages
-A message system for servers to interact over a proxy.
+A minecraft plugin for server to interact over a proxy.
