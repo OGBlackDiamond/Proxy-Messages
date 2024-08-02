@@ -6,12 +6,28 @@ plugins {
     id("buildlogic.java-application-conventions")
 }
 
+repositories {
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+}
+
 dependencies {
     implementation("org.apache.commons:commons-text")
     //implementation(project(":utilities"))
+    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.app.App"
+    mainClass = "dev.ogblackdiamond.proxymessages.ProxyMessages"
+}
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = application.mainClass
+    }
 }

@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = "Proxy-Messages"
-include("ProxyMessagesVelocity") //, "ProxyMessagesPaper")
+include("ProxyMessagesVelocity", "ProxyMessagesPaper")
