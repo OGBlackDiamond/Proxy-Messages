@@ -1,0 +1,8 @@
+# enables a network-wide join message for when a player joins the network
+global-network-join: true
+
+# enables a network-wide leave message for when a player leaves the network
+global-network-leave: true
+
+# enables a network-wide message that notifies players when a player switches between servers when true
+global-network-switch: true
