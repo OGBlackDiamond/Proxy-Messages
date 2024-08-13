@@ -14,6 +14,11 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
+import dev.ogblackdiamond.proxymessages.util.MessageUtil;
+import net.kyori.adventure.text.Component;
+
+import java.util.List;
+import java.util.Random;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -26,7 +31,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "Proxy Messages", version = "1.1.0", 
+@Plugin(id = "proxymessages", name = "Proxy Messages", version = "2.0.0", 
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -37,12 +42,19 @@ public class ProxyMessages {
     @DataDirectory
     private final Path dataDirectory;
 
+    private MessageUtil messageUtil;
 
     private boolean globalJoin;
     
     private boolean globalLeave;
 
     private boolean globalSwitch;
+
+    private List<String> joinMessageOptions;
+    
+    private List <String> leaveMessageOptions;
+
+    private List<String> switchMessageOptions;
 
     /**
      * Constructor, initializes the logger and the proxy server.
@@ -52,6 +64,8 @@ public class ProxyMessages {
         this.server = server;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
+
+        messageUtil = new MessageUtil();
 
         logger.info("Thank you for using ProxyMessages");
     }
@@ -76,7 +90,10 @@ public class ProxyMessages {
         globalLeave = root.node("global-network-leave").getBoolean();
 
         globalSwitch = root.node("global-network-switch").getBoolean();
-
+        
+        joinMessageOptions = root.node("join-message-options").getList(String.class);
+        leaveMessageOptions = root.node("leave-message-options").getList(String.class);
+        switchMessageOptions = root.node("switch-message-options").getList(String.class);
     }
 
     /**
@@ -90,20 +107,26 @@ public class ProxyMessages {
         if (event.getPreviousServer() == null && !globalJoin) return;
 
         Player player = event.getPlayer();
+        
+        boolean previousServerNull = event.getPreviousServer() == null;
 
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-
-        out.writeUTF(event.getPreviousServer() == null ? "join" : "switch");
-        out.writeUTF(player.getUsername());
-
+        String message;
         
         if (event.getPreviousServer() != null) {
-            out.writeUTF(event.getPreviousServer().getServerInfo().getName());
-            out.writeUTF(player.getCurrentServer().get().getServerInfo().getName());
+            message = switchMessageOptions.get(new Random().nextInt(switchMessageOptions.size()));
+        } else {
+            message = joinMessageOptions.get(new Random().nextInt(switchMessageOptions.size()));
         }
 
-        sendMessage(out.toByteArray());
-
+        sendMessage(
+            messageUtil.compileFormattedMessage(
+                event.getPreviousServer() == null ? "join" : "switch",
+                player.getUsername(),
+                previousServerNull ? "" : event.getPreviousServer().getServerInfo().getName(),
+                previousServerNull ? "" : player.getCurrentServer().get().getServerInfo().getName(),
+                message
+            )
+        );
     }
 
     /**
@@ -116,23 +139,23 @@ public class ProxyMessages {
         
         Player player = event.getPlayer();
 
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-
-        out.writeUTF("quit");
-        out.writeUTF(player.getUsername());
-
-        sendMessage(out.toByteArray());
+        sendMessage(
+            messageUtil.compileFormattedMessage(
+                "quit",
+                player.getUsername(),
+                "",
+                "",
+                leaveMessageOptions.get(new Random().nextInt(switchMessageOptions.size()))
+            )
+        );
 
     }
 
 
-    private void sendMessage(byte[] message) {
+    private void sendMessage(Component message) {
         for (RegisteredServer srvr : server.getAllServers()) {
             if (!srvr.getPlayersConnected().isEmpty()) {
-                srvr.sendPluginMessage(
-                    MinecraftChannelIdentifier.from("proxymessages:main"),
-                    message
-                );
+                srvr.sendMessage(message);
             }
         }
     }

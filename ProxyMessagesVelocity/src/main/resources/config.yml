@@ -6,3 +6,14 @@ global-network-leave: true
 
 # enables a network-wide message that notifies players when a player switches between servers when true
 global-network-switch: true
+
+join-message-options:
+  - "{player} joined the network"
+
+leave-message-options:
+  - "{player} left the network"
+
+switch-message-options:
+  - "{player} left {prev} and joined {cur}"
+
+

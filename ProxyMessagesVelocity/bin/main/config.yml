@@ -1,0 +1,27 @@
+# enables a network-wide join message for when a player joins the network
+global-network-join: true
+
+# enables a network-wide leave message for when a player leaves the network
+global-network-leave: true
+
+# enables a network-wide message that notifies players when a player switches between servers when true
+global-network-switch: true
+
+# options from this list will be randomly chosen to be displayed when a player joins the network
+# {player} will be replaced by the player name
+join-message-options:
+  - "{player} joined the network"
+
+# options from this list will be randomly chosen to be displayed when a player leaves the network
+# {player} will be replaced by the player name
+leave-message-options:
+  - "{player} left the network"
+
+# options from this list will be randomly chosen to be displayed when a player changes between two servers on the network 
+# {player} will be replaced by the player name
+# {prev} will be replaced by the server the player is connecting from
+# {cur} will be replaced by the server the player is connecting to
+switch-message-options:
+  - "{player} left {prev} and joined {cur}"
+
+
