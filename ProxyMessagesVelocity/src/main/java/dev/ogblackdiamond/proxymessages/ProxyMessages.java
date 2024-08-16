@@ -111,11 +111,11 @@ public class ProxyMessages {
         boolean previousServerNull = event.getPreviousServer() == null;
 
         String message;
-        
-        if (event.getPreviousServer() != null) {
-            message = switchMessageOptions.get(new Random().nextInt(switchMessageOptions.size()));
+
+        if (event.getPreviousServer() == null) {
+            message = joinMessageOptions.get((int) Math.random() * switchMessageOptions.size());
         } else {
-            message = joinMessageOptions.get(new Random().nextInt(switchMessageOptions.size()));
+            message = switchMessageOptions.get((int) Math.random() * switchMessageOptions.size());
         }
 
         sendMessage(
@@ -141,11 +141,11 @@ public class ProxyMessages {
 
         sendMessage(
             messageUtil.compileFormattedMessage(
-                "quit",
+                "leave",
                 player.getUsername(),
                 "",
                 "",
-                leaveMessageOptions.get(new Random().nextInt(switchMessageOptions.size()))
+                leaveMessageOptions.get((int) Math.random() * switchMessageOptions.size())
             )
         );
 

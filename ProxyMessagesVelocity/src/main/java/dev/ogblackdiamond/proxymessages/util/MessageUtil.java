@@ -63,7 +63,7 @@ public class MessageUtil {
             }
 
             default: {
-                return Component.text("[ProxyMessages] Invalid type passed! Cannot render message.");
+                return Component.text("[ProxyMessages] Invalid type passed! Cannot render message.").color(NamedTextColor.RED);
             }
 
         }

@@ -22,11 +22,11 @@ public class ProxyMessages extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        event.joinMessage();
+        event.joinMessage(null);
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        event.quitMessage();
+        event.quitMessage(null);
     }
 }
