@@ -1,5 +1,5 @@
 name: ProxyMessages
-version: 2.1.0
+version: 2.1.2
 main: dev.ogblackdiamond.proxymessages.ProxyMessages
 description: Paper plugin to interface with Velocity
 author: BlackDiamond

@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
-
 /**
  * Main class for ProxyMessages.
  */
