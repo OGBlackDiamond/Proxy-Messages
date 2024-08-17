@@ -31,7 +31,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.1.1", 
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.1.2", 
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -113,9 +113,9 @@ public class ProxyMessages {
         String message;
 
         if (event.getPreviousServer() == null) {
-            message = joinMessageOptions.get((int) Math.random() * joinMessageOptions.size());
+            message = joinMessageOptions.get((int) (Math.random() * joinMessageOptions.size()));
         } else {
-            message = switchMessageOptions.get((int) Math.random() * switchMessageOptions.size());
+            message = switchMessageOptions.get((int) (Math.random() * switchMessageOptions.size()));
         }
 
         sendMessage(
