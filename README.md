@@ -1,9 +1,4 @@
 # Proxy-Messages
-A minecraft plugin for server to interact over a proxy.
-
-Currently, the only support is for Velocity and Paper.
-
-## About
 This plugin will send messages to every player on every server in the network to notify when someone joins the network, when they switch between two servers, and when they disconnect from the network.
 
 ## Usage
