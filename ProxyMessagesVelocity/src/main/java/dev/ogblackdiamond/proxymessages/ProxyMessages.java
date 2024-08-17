@@ -145,7 +145,7 @@ public class ProxyMessages {
                 player.getUsername(),
                 "",
                 "",
-                leaveMessageOptions.get((int) Math.random() * switchMessageOptions.size())
+                leaveMessageOptions.get((int) (Math.random() * switchMessageOptions.size()))
             )
         );
 
