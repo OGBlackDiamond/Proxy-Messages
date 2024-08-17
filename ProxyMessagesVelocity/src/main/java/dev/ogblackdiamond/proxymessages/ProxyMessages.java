@@ -113,7 +113,7 @@ public class ProxyMessages {
         String message;
 
         if (event.getPreviousServer() == null) {
-            message = joinMessageOptions.get((int) Math.random() * switchMessageOptions.size());
+            message = joinMessageOptions.get((int) Math.random() * joinMessageOptions.size());
         } else {
             message = switchMessageOptions.get((int) Math.random() * switchMessageOptions.size());
         }
