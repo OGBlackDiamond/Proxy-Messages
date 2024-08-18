@@ -135,6 +135,9 @@ public class ProxyMessages {
     public void onPlayerDisconnect(DisconnectEvent event) {
 
         if (!globalLeave) return;
+
+        // checks to ensure that a player was actually connected to the server before printing a message
+        if (event.getLoginStatus() != DisconnectEvent.LoginStatus.SUCCESSFUL_LOGIN) return;
         
         Player player = event.getPlayer();
 
