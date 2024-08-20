@@ -3,6 +3,7 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     maven {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
@@ -14,6 +15,8 @@ dependencies {
     //implementation(project(":utilities"))
     compileOnly("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
+
+    implementation("net.dv8tion:JDA:5.0.2")
 }
 
 java {

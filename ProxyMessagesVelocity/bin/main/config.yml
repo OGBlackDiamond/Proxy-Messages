@@ -27,4 +27,6 @@ leave-message-options:
 switch-message-options:
   - "{player} left {prev} and joined {cur}"
 
-
+discord:
+  - enabled: "false"
+  - bot-token: "{token}"

@@ -15,6 +15,8 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
+import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
+
 import net.kyori.adventure.text.Component;
 
 import java.util.List;
@@ -42,6 +44,7 @@ public class ProxyMessages {
     private final Path dataDirectory;
 
     private MessageUtil messageUtil;
+    private DiscordUtil discordUtil;
 
     private boolean globalJoin;
     
@@ -93,6 +96,27 @@ public class ProxyMessages {
         joinMessageOptions = root.node("join-message-options").getList(String.class);
         leaveMessageOptions = root.node("leave-message-options").getList(String.class);
         switchMessageOptions = root.node("switch-message-options").getList(String.class);
+
+        List<String> discordOptions = root.node("discord").getList(String.class);
+            
+        if (discordOptions.get(0).equals("false")) return;
+
+        discordUtil = new DiscordUtil(
+            // 2nd option is the token
+            discordOptions.get(1),
+            // 3rd option is the channel id
+            discordOptions.get(2)
+        );
+
+        String status = discordUtil.getStatus();
+
+        if (!status.equals("good") || discordUtil.checkMessageChannel()) {
+            logger.error(status);
+            return;
+        }
+        
+        discordUtil.sendMessage("ProxyMessages Successfully hooked into Discord!");
+
     }
 
     /**
