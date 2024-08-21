@@ -26,21 +26,24 @@ This plugin is only required to be on the proxy server. However, the vanilla "{p
 In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
 
 ### Discord:
-This section discusses the discord integration functionality features and customizeability.
+This section discusses the discord integration functionality features and customizability.
 
 Under the `discord` section of your `config.yml`:
 
 `enabled`: Toggles the discord functionality.
-**Note:** None of the configuration from this point forward will not matter `enabled` is `false`
-`bot-token`: A string that represents the bot token that the plugin will attempt to connect to. This is the same as the one you might use in the DiscordSRV plugin.
-`channel-id`: The ID of the channel you want the proxy messages to be sent to.
 
-`text-configuration`: Options to customize the messages that get sent. Text options support markdown formatting.
-`online-message`: The message to be sent when the proxy boots up.
-`offline-message`: The message to be sent when the proxy shuts down.
-`server-count`: Toggles whether a list of active servers will be printed when booting the proxy.
-`display-icon`: Toggles whether or not to display a provided image on startup and shutdown. 
-**Note:** `display-icon` will not work unless you provide an image for it to display. You can do this by placing an image named `icon.jppg` in your `plugins/proxymessages` directory. When turned to  true, the plugin will detect the image and use it automatically.
+**Note:** None of the configuration from this point forward will not matter if `enabled` is `false`
+
+* `bot-token`: A string that represents the bot token that the plugin will attempt to connect to. This is the same as the one you might use in the DiscordSRV plugin.
+* `channel-id`: The ID of the channel you want the proxy messages to be sent to.
+
+* `text-configuration`: Options to customize the messages that get sent. Text options support markdown formatting.
+  * `online-message`: The message to be sent when the proxy boots up.
+  * `offline-message`: The message to be sent when the proxy shuts down.
+  * `server-count`: Toggles whether a list of active servers will be printed when booting the proxy.
+  * `display-icon`: Toggles whether or not to display a provided image on startup and shutdown.
+
+**Note:** `display-icon` will not work unless you provide an image for it to display. You can do this by placing an image named `icon.jpg` in your `plugins/proxymessages` directory. When turned to `true`, the plugin will detect the image and use it automatically.
 
 
 
