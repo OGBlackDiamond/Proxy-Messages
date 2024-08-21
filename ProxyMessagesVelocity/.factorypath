@@ -36,4 +36,7 @@
     <factorypathentry kind="EXTJAR" id="/home/caden/.gradle/caches/modules-2/files-2.1/net.kyori/adventure-key/4.17.0/799f1b5fedb920a7b71916e9b71123ff94d07acf/adventure-key-4.17.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="EXTJAR" id="/home/caden/.gradle/caches/modules-2/files-2.1/com.github.ben-manes.caffeine/caffeine/3.1.5/566c9b18953d9c7e916ab6823bf404899dccfefd/caffeine-3.1.5.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="EXTJAR" id="/home/caden/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.10.1/b3add478d4382b78ea20b1671390a858002feb6c/gson-2.10.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="/home/caden/.gradle/caches/modules-2/files-2.1/net.dv8tion/JDA/5.0.2/40cdcec9ce451b0724f98e53600fe5b14324b9ad/JDA-5.0.2.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="/home/caden/.gradle/caches/modules-2/files-2.1/net.dv8tion/JDA/5.0.2/8019308eafdaf930f8134c29cd0d0e08b2cbe9d0/JDA-5.0.2.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="/home/caden/.gradle/caches/modules-2/files-2.1/net.dv8tion/JDA/5.0.2/eb5a8dad1d737d2ac69aec20c46ed3ff2a4cc663/JDA-5.0.2.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>

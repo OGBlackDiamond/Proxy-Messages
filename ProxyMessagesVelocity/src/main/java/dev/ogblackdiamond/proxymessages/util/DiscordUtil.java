@@ -1,42 +1,156 @@
 package dev.ogblackdiamond.proxymessages.util;
 
-import java.util.EventListener;
+import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 
+import java.awt.Color;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.UUID;
+
+import org.spongepowered.configurate.CommentedConfigurationNode;
+
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+
+import dev.ogblackdiamond.proxymessages.ProxyMessages;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.GenericEvent;
 
 public class DiscordUtil implements EventListener { 
 
     private JDA jda;
 
-    private MessageChannel messageChannel;
+    ProxyMessages proxyMessages;
+
+    private TextChannel messageChannel;
 
     private String status;
+
+    private FileUpload file;
+
+    private boolean imageExists;
+
+    String botToken;
+
+    String channelID;
+
+    CommentedConfigurationNode textConfiguration;
     
-    public DiscordUtil(String token, String channel) {
+    String onlineMessage;
+
+    String offlineMessage;
+
+    boolean serverCount;
+
+    boolean displayIcon;
 
 
-        if (token.substring(0, 1).equals("{") || channel.substring(0, 1).equals("{")) {
+    public DiscordUtil(ProxyMessages proxyMessages, CommentedConfigurationNode configNode) {
+
+        botToken =  configNode.node("bot-token").getString();
+
+        channelID = configNode.node("channel-id").getString();
+
+        textConfiguration = configNode.node("text-configuration");
+
+        onlineMessage = textConfiguration.node("online-message").getString();
+
+        offlineMessage = textConfiguration.node("offline-message").getString();
+
+        serverCount = textConfiguration.node("server-count").getBoolean();
+        
+        displayIcon = textConfiguration.node("display-icon").getBoolean();
+
+        File imageFile = new File("plugins/proxymessages/icon.jpg");
+
+        if (imageFile != null) {
+            file = FileUpload.fromData(imageFile, "icon.jpg");
+            imageExists = true;
+        } else {
+            imageExists = false;
+        }
+
+        if (botToken.substring(0, 1).equals("{") || channelID.substring(0, 1).equals("{")) {
             status = "Invalid channel or token provided!";
             return;
         }
 
-        jda = JDABuilder.createDefault(token)
+        jda = JDABuilder.createDefault(botToken)
             .addEventListeners(this)
             .build();
 
+        
         try {
             jda.awaitReady();
-        } catch (InterruptedException e) {/* I dunno */}
+        } catch (InterruptedException e) {}
 
+
+        this.proxyMessages = proxyMessages;
+        
 
         // a null check should be be performed in another class after construction
-        messageChannel = jda.getChannelById(MessageChannel.class, channel);
+        messageChannel = jda.getChannelById(TextChannel.class, channelID);
+        status = "good";
     }
 
     public void sendMessage(String message) {
-        messageChannel.sendMessage(message);
+        messageChannel.sendMessageFormat(message).complete();
+
+    }
+
+    public void proxyOnline() {
+    
+        String serversList = "";
+
+        for (RegisteredServer server : proxyMessages.getProxy().getAllServers()) {
+            serversList += "* " + server.getServerInfo().getName() + "\n";
+        }
+
+        EmbedBuilder builder = new EmbedBuilder()
+            .setDescription(onlineMessage)
+            .setColor(new Color(20, 200, 20));
+
+        if (imageExists && displayIcon) builder.setImage("attachment://icon.jpg");
+
+        if (serverCount) builder.addField("Current Servers:", serversList, false);
+
+        MessageCreateAction msg = messageChannel.sendMessageEmbeds(builder.build());
+
+        if (imageExists && displayIcon) msg.addFiles(file);
+
+        msg.complete();
+
+    }
+
+    public void proxyOffline() {
+
+        EmbedBuilder builder = new EmbedBuilder()
+            .setDescription(offlineMessage)
+            .setColor(new Color(200, 20, 20));
+
+        if (imageExists && displayIcon) builder.setImage("attachment://icon.jpg");
+
+        MessageCreateAction msg = messageChannel.sendMessageEmbeds(builder.build());
+
+        if (imageExists && displayIcon) msg.addFiles(file);
+        
+        msg.complete();
+
+    }
+
+    public void playerNotification(String message, UUID uuid) {
+
+        EmbedBuilder builder = new EmbedBuilder()
+            .setColor(new Color(20, 20, 200))
+            .setAuthor(message, "https://github.com/OGBlackDiamond/Proxy-Messages", "https://crafthead.net/avatar/" + uuid.toString());
+
+        messageChannel.sendMessageEmbeds(builder.build()).complete();
     }
 
     public String getStatus() {
@@ -47,5 +161,10 @@ public class DiscordUtil implements EventListener {
         boolean channel = messageChannel == null;
         if (channel) status = "Channel provided could not be found!";
         return channel;
+    }
+
+    @Override
+    public void onEvent(GenericEvent event) {
+        // something here in the future?
     }
 } 

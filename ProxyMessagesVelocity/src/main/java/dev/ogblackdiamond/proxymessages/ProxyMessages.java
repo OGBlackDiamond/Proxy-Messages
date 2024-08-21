@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
@@ -21,6 +22,7 @@ import net.kyori.adventure.text.Component;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -97,15 +99,13 @@ public class ProxyMessages {
         leaveMessageOptions = root.node("leave-message-options").getList(String.class);
         switchMessageOptions = root.node("switch-message-options").getList(String.class);
 
-        List<String> discordOptions = root.node("discord").getList(String.class);
+        CommentedConfigurationNode discordOptions = root.node("discord");
             
-        if (discordOptions.get(0).equals("false")) return;
+        if (!discordOptions.node("enabled").getBoolean()) return;
 
         discordUtil = new DiscordUtil(
-            // 2nd option is the token
-            discordOptions.get(1),
-            // 3rd option is the channel id
-            discordOptions.get(2)
+            this,
+            discordOptions
         );
 
         String status = discordUtil.getStatus();
@@ -115,8 +115,12 @@ public class ProxyMessages {
             return;
         }
         
-        discordUtil.sendMessage("ProxyMessages Successfully hooked into Discord!");
+        discordUtil.proxyOnline();
+    }
 
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        discordUtil.proxyOffline();
     }
 
     /**
@@ -148,7 +152,8 @@ public class ProxyMessages {
                 previousServerNull ? "" : event.getPreviousServer().getServerInfo().getName(),
                 previousServerNull ? "" : player.getCurrentServer().get().getServerInfo().getName(),
                 message
-            )
+            ),
+            event.getPlayer().getUniqueId()
         );
     }
 
@@ -172,16 +177,21 @@ public class ProxyMessages {
                 "",
                 "",
                 leaveMessageOptions.get((int) (Math.random() * leaveMessageOptions.size()))
-            )
+            ),
+            event.getPlayer().getUniqueId()
         );
     }
 
+    public ProxyServer getProxy() {
+        return server;
+    }
 
-    private void sendMessage(Component message) {
+    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid) {
         for (RegisteredServer srvr : server.getAllServers()) {
             if (!srvr.getPlayersConnected().isEmpty()) {
-                srvr.sendMessage(message);
+                srvr.sendMessage(message.getComponent());
             }
         }
+        if (discordUtil != null) discordUtil.playerNotification(message.getString(), uuid);
     }
 }

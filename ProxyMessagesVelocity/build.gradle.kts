@@ -1,5 +1,7 @@
 plugins {
     id("buildlogic.java-application-conventions")
+    id("com.gradleup.shadow") version "8.3.0"
+    id("java")
 }
 
 repositories {
@@ -28,8 +30,19 @@ application {
     mainClass = "dev.ogblackdiamond.proxymessages.ProxyMessages"
 }
 
+
+/*
 tasks.jar {
     manifest {
         attributes["Main-Class"] = application.mainClass
     }
+}
+*/
+
+
+tasks.shadowJar {
+    archiveBaseName.set("ProxyMessagesVelocity")
+    archiveClassifier.set("")
+    archiveVersion.set("2.1.2")
+    minimize()
 }

@@ -8,10 +8,12 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public class MessageUtil {
 
-    public Component compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String chosenMessage) {
+    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String chosenMessage) {
 
         TextComponent.Builder finalMessage = Component.text();
         TextColor textColor = NamedTextColor.YELLOW;
+
+        String finalString = "";
 
         int messageLength = chosenMessage.length();
         int playerNameLength = "{player}".length(); 
@@ -36,9 +38,11 @@ public class MessageUtil {
                         i += colorLength - 1;
                     } else if (!atLength && chosenMessage.substring(i, i + playerNameLength).equals("{player}")) {
                         finalMessage.append(Component.text(playerName).color(textColor).decoration(TextDecoration.BOLD, true));
+                        finalString += playerName;
                         i += playerNameLength - 1;
                     } else {
                         finalMessage.append(Component.text(chosenMessage.substring(i, i+1)).color(textColor).decoration(TextDecoration.BOLD, false));
+                        finalString += chosenMessage.substring(i, i+1);
                     }
                 }
                 break;
@@ -58,27 +62,53 @@ public class MessageUtil {
                         i += colorLength - 1;
                     } else if (!playerAtLength && chosenMessage.substring(i, i + playerNameLength).equals("{player}")) {
                         finalMessage.append(Component.text(playerName).color(textColor).decoration(TextDecoration.BOLD, true));
+                        finalString += playerName;
                         i += playerNameLength - 1;
                     } else if (!previousServerLength && chosenMessage.substring(i, i + previousServerNameLength).equals("{prev}")) {
                         finalMessage.append(Component.text(previousServer).color(textColor).decoration(TextDecoration.BOLD, true));
+                        finalString += previousServer;
                         i += previousServerNameLength - 1;
                     } else if (!newServerLength && chosenMessage.substring(i, i + newServerNameLength).equals("{cur}")) {
                         finalMessage.append(Component.text(newServer).color(textColor).decoration(TextDecoration.BOLD, true));
+                        finalString += newServer;
                         i += newServerNameLength - 1;
                     } else { 
                         finalMessage.append(Component.text(chosenMessage.substring(i, i+1)).color(textColor).decoration(TextDecoration.BOLD, false));
+                        finalString += chosenMessage.substring(i, i+1);
                     }
                 }
                 break;
             }
 
             default: {
-                return Component.text("[ProxyMessages] Invalid type passed! Cannot render message.").color(NamedTextColor.RED);
+                return new MessageReturns(
+                    Component.text("[ProxyMessages] Invalid type passed! Cannot render message.").color(NamedTextColor.RED),
+                    "[ProxyMessages] Invalid type passed! Cannot render message."
+                );
             }
 
         }
 
-        return finalMessage.build(); 
+        return new MessageReturns(finalMessage.build(), finalString); 
+    }
+
+    public class MessageReturns {
+
+        Component component;
+        String string;
+
+        public MessageReturns(Component component, String string) {
+            this.component = component;
+            this.string = string;
+        }
+
+        public Component getComponent() {
+            return component;
+        }
+
+        public String getString() {
+            return string;
+        }
     }
 }
 
