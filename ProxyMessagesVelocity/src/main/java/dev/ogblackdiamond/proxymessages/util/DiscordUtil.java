@@ -6,8 +6,8 @@ import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.UUID;
+import java.util.regex.*;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
@@ -17,9 +17,7 @@ import dev.ogblackdiamond.proxymessages.ProxyMessages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.GenericEvent;
 
 public class DiscordUtil implements EventListener { 
@@ -50,6 +48,10 @@ public class DiscordUtil implements EventListener {
 
     boolean displayIcon;
 
+    Color joinColor;
+    Color leaveColor;
+    Color switchColor;
+
 
     public DiscordUtil(ProxyMessages proxyMessages, CommentedConfigurationNode configNode) {
 
@@ -67,6 +69,10 @@ public class DiscordUtil implements EventListener {
         
         displayIcon = textConfiguration.node("display-icon").getBoolean();
 
+        String joinColorStr = configNode.node("join-message-options").getString();
+        String leaveColorStr = configNode.node("leave-message-options").getString();
+        String switchColorStr = configNode.node("switch-message-options").getString();
+
         File imageFile = new File("plugins/proxymessages/icon.jpg");
 
         if (imageFile != null) {
@@ -79,6 +85,24 @@ public class DiscordUtil implements EventListener {
         if (botToken.substring(0, 1).equals("{") || channelID.substring(0, 1).equals("{")) {
             status = "Invalid channel or token provided!";
             return;
+        }
+
+
+        // Load and validate colors from config
+        if(!isValidHex(joinColorStr)){
+            joinColor = Color.decode("#00FF00");
+        }else{
+            joinColor = Color.decode(joinColorStr);
+        }
+        if(!isValidHex(leaveColorStr)){
+            leaveColor = Color.decode("#FF0000");
+        }else{
+            leaveColor = Color.decode(leaveColorStr);
+        }
+        if(!isValidHex(switchColorStr)){
+            switchColor = Color.decode("#FFFF00");
+        }else{
+            switchColor = Color.decode(switchColorStr);
         }
 
         jda = JDABuilder.createDefault(botToken)
@@ -144,11 +168,26 @@ public class DiscordUtil implements EventListener {
 
     }
 
-    public void playerNotification(String message, UUID uuid) {
-
+    public void playerNotification(MessageUtil.MessageReturns message, UUID uuid) {
+        Color messageColor = new Color(20, 20, 200);
+        switch(message.type){
+            case "join": {
+                messageColor = joinColor;
+                break;
+            }
+            case "leave": {
+                messageColor = leaveColor;
+                break;
+            }
+            case "switch":{
+                messageColor = switchColor;
+                break;
+            }
+            default: {}
+        }
         EmbedBuilder builder = new EmbedBuilder()
-            .setColor(new Color(20, 20, 200))
-            .setAuthor(message, "https://github.com/OGBlackDiamond/Proxy-Messages", "https://crafthead.net/avatar/" + uuid.toString());
+            .setColor(messageColor)
+            .setAuthor(message.getString(), "https://github.com/OGBlackDiamond/Proxy-Messages", "https://crafthead.net/avatar/" + uuid.toString());
 
         messageChannel.sendMessageEmbeds(builder.build()).complete();
     }
@@ -166,5 +205,18 @@ public class DiscordUtil implements EventListener {
     @Override
     public void onEvent(GenericEvent event) {
         // something here in the future?
+    }
+
+    public boolean isValidHex(String str)
+    {
+        boolean ret = false;
+
+        if(str != null) {
+            String hexRegex = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
+            Pattern hexPattern = Pattern.compile(hexRegex);
+            Matcher hexMatcher = hexPattern.matcher(str);
+            ret = hexMatcher.matches();
+        }
+        return ret;
     }
 } 

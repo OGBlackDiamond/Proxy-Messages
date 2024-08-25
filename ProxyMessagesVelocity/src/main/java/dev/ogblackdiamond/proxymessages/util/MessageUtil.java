@@ -25,7 +25,7 @@ public class MessageUtil {
         // builds the final component, interpolating the correct strings when need 
         switch (type) {
             
-            case "join": 
+            case "join":
             case "leave": {
                 
                 for (int i = 0; i < messageLength; i++) {
@@ -83,23 +83,26 @@ public class MessageUtil {
             default: {
                 return new MessageReturns(
                     Component.text("[ProxyMessages] Invalid type passed! Cannot render message.").color(NamedTextColor.RED),
-                    "[ProxyMessages] Invalid type passed! Cannot render message."
+                    "[ProxyMessages] Invalid type passed! Cannot render message.",
+                        "other"
                 );
             }
 
         }
 
-        return new MessageReturns(finalMessage.build(), finalString); 
+        return new MessageReturns(finalMessage.build(), finalString, type);
     }
 
     public class MessageReturns {
 
         Component component;
         String string;
+        String type;
 
-        public MessageReturns(Component component, String string) {
+        public MessageReturns(Component component, String string, String type) {
             this.component = component;
             this.string = string;
+            this.type = type;
         }
 
         public Component getComponent() {
