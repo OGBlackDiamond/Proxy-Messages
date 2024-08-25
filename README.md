@@ -36,7 +36,9 @@ Under the `discord` section of your `config.yml`:
 
 * `bot-token`: A string that represents the bot token that the plugin will attempt to connect to. This is the same as the one you might use in the DiscordSRV plugin.
 * `channel-id`: The ID of the channel you want the proxy messages to be sent to.
-
+* `join-color`: Hex color code to be used for the Discord embed for join messages.
+* `leave-color`: Hex color code to be used for the Discord embed for leave messages.
+* `switch-color`: Hex color code to be used for the Discord embed for switch messages.
 * `text-configuration`: Options to customize the messages that get sent. Text options support markdown formatting.
   * `online-message`: The message to be sent when the proxy boots up.
   * `offline-message`: The message to be sent when the proxy shuts down.
