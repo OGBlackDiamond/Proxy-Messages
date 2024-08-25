@@ -150,7 +150,7 @@ public class ProxyMessages {
                 event.getPreviousServer() == null ? "join" : "switch",
                 player.getUsername(),
                 previousServerNull ? "" : event.getPreviousServer().getServerInfo().getName(),
-                previousServerNull ? "" : player.getCurrentServer().get().getServerInfo().getName(),
+                player.getCurrentServer().get().getServerInfo().getName(),
                 message
             ),
             event.getPlayer().getUniqueId()
@@ -174,7 +174,7 @@ public class ProxyMessages {
             messageUtil.compileFormattedMessage(
                 "leave",
                 player.getUsername(),
-                "",
+                player.getCurrentServer().get().getServerInfo().getName(),
                 "",
                 leaveMessageOptions.get((int) (Math.random() * leaveMessageOptions.size()))
             ),
