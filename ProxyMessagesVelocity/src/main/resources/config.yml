@@ -32,6 +32,14 @@ discord:
   enabled: false 
   bot-token: "{token}"
   channel-id: "{channel-id}"
+
+  # Color of the discord embed for join messages
+  join-color: "#00ff00"
+  # Color of the discord embed for leave messages
+  leave-color: "#ff0000"
+  # Color of the discord embed for switch messages
+  switch-color: "#ffff00"
+
   # all text options support markdown formatting
   # these messages DO NOT support the hex codes like above
   text-configuration:
@@ -42,5 +50,4 @@ discord:
     server-count: true
 
     # on startup and shutdown, show an image if you provided one
-    display-icon: false 
-
+    display-icon: false

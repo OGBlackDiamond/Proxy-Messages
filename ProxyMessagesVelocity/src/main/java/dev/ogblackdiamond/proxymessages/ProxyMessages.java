@@ -34,7 +34,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.2.0", 
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.3.0",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -150,7 +150,7 @@ public class ProxyMessages {
                 event.getPreviousServer() == null ? "join" : "switch",
                 player.getUsername(),
                 previousServerNull ? "" : event.getPreviousServer().getServerInfo().getName(),
-                previousServerNull ? "" : player.getCurrentServer().get().getServerInfo().getName(),
+                player.getCurrentServer().get().getServerInfo().getName(),
                 message
             ),
             event.getPlayer().getUniqueId()
@@ -174,7 +174,7 @@ public class ProxyMessages {
             messageUtil.compileFormattedMessage(
                 "leave",
                 player.getUsername(),
-                "",
+                player.getCurrentServer().get().getServerInfo().getName(),
                 "",
                 leaveMessageOptions.get((int) (Math.random() * leaveMessageOptions.size()))
             ),
@@ -192,6 +192,6 @@ public class ProxyMessages {
                 srvr.sendMessage(message.getComponent());
             }
         }
-        if (discordUtil != null) discordUtil.playerNotification(message.getString(), uuid);
+        if (discordUtil != null) discordUtil.playerNotification(message, uuid);
     }
 }
