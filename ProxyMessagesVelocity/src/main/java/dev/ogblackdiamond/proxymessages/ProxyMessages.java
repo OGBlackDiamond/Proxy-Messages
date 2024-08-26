@@ -140,7 +140,7 @@ public class ProxyMessages {
             resourcePackUrl = resourcePackOptions.node("url").getString();
             resourcePackHash = resourcePackOptions.node("sha1-hash").getString().getBytes();
             resourcePackRequired = resourcePackOptions.node("required").getBoolean();
-            resourcePackPrompt = messageUtil.compileColoredMessage(resourcePackOptions.node("prompt").getString());
+            resourcePackPrompt = messageUtil.compileColoredMessage(resourcePackOptions.node("prompt").getString()).getComponent();
 
             ResourcePackInfo.Builder builder = server.createResourcePackBuilder(resourcePackUrl);
             // builder.setHash(resourcePackHash);

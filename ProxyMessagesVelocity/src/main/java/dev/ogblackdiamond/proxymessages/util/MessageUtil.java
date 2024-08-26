@@ -45,14 +45,20 @@ public class MessageUtil {
             }
         }
 
-        return new MessageReturns(compileColoredMessage(finalString), finalString, type);
+        return compileColoredMessage(finalString, type);
+    }
+
+    public MessageReturns compileColoredMessage(String coloredString) {
+        return compileColoredMessage(coloredString, "");
     }
 
     // removes and applies hex code coloring to the given string, returns a component object
-    public Component compileColoredMessage(String coloredString) {
+    public MessageReturns compileColoredMessage(String coloredString, String type) {
 
         TextComponent.Builder finalMessage = Component.text();
         TextColor textColor = NamedTextColor.YELLOW;
+
+        String finalString = "";
 
         int colorLength = "{#xxxxxx}".length();
 
@@ -64,12 +70,13 @@ public class MessageUtil {
                 textColor = TextColor.fromCSSHexString(coloredString.substring(i + 1, i + colorLength - 1));
                 i += colorLength - 1;
             } else {
-               finalMessage.append(Component.text(coloredString.substring(i, i+1)).color(textColor).decoration(TextDecoration.BOLD, false));
+                finalMessage.append(Component.text(coloredString.substring(i, i + 1)).color(textColor).decoration(TextDecoration.BOLD, false));
+                finalString += coloredString.substring(i, i + 1);
             }
 
         }
 
-        return finalMessage.build();
+        return new MessageReturns(finalMessage.build(), finalString, type); 
     }
 
     /* 
