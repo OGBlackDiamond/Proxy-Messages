@@ -1,1 +1,1 @@
-{"id":"proxymessages","name":"ProxyMessages","version":"2.3.0","description":"A message system for servers to interact over a proxy.","authors":["BlackDiamond"],"dependencies":[],"main":"dev.ogblackdiamond.proxymessages.ProxyMessages"}
+{"id":"proxymessages","name":"ProxyMessages","version":"2.4.0","description":"A message system for servers to interact over a proxy.","authors":["BlackDiamond"],"dependencies":[],"main":"dev.ogblackdiamond.proxymessages.ProxyMessages"}
