@@ -77,7 +77,7 @@ public class DiscordUtil implements EventListener {
 
         File imageFile = new File("plugins/proxymessages/icon.jpg");
 
-        if (imageFile != null) {
+        if (imageFile != null && displayIcon) {
             file = FileUpload.fromData(imageFile, "icon.jpg");
             imageExists = true;
         } else {
