@@ -55,6 +55,8 @@ public class DiscordUtil implements EventListener {
 
     public DiscordUtil(ProxyMessages proxyMessages, CommentedConfigurationNode configNode) {
 
+        // load all discord values from config
+
         botToken =  configNode.node("bot-token").getString();
 
         channelID = configNode.node("channel-id").getString();
@@ -88,7 +90,7 @@ public class DiscordUtil implements EventListener {
         }
 
 
-        // Load and validate colors from config
+        // load and validate colors from config
         if(!isValidHex(joinColorStr)){
             joinColor = Color.decode("#00FF00");
         }else{
@@ -105,15 +107,15 @@ public class DiscordUtil implements EventListener {
             switchColor = Color.decode(switchColorStr);
         }
 
+
+        // creates the jda wrapper
         jda = JDABuilder.createDefault(botToken)
             .addEventListeners(this)
             .build();
-
         
         try {
             jda.awaitReady();
         } catch (InterruptedException e) {}
-
 
         this.proxyMessages = proxyMessages;
         
@@ -123,11 +125,13 @@ public class DiscordUtil implements EventListener {
         status = "good";
     }
 
+    // sends a message in the given message channel
     public void sendMessage(String message) {
         messageChannel.sendMessageFormat(message).complete();
 
     }
 
+    // sends a message to the discord channel when the proxy comes online
     public void proxyOnline() {
     
         String serversList = "";
@@ -152,6 +156,7 @@ public class DiscordUtil implements EventListener {
 
     }
 
+    // sends a message to the discord channel when the proxy shuts down
     public void proxyOffline() {
 
         EmbedBuilder builder = new EmbedBuilder()
@@ -168,9 +173,10 @@ public class DiscordUtil implements EventListener {
 
     }
 
+    // handles sending messages when player action happens on the proxy
     public void playerNotification(MessageUtil.MessageReturns message, UUID uuid) {
         Color messageColor = new Color(20, 20, 200);
-        switch(message.type){
+        switch(message.getType()){
             case "join": {
                 messageColor = joinColor;
                 break;
@@ -192,10 +198,12 @@ public class DiscordUtil implements EventListener {
         messageChannel.sendMessageEmbeds(builder.build()).complete();
     }
 
+    // returns the status of this object
     public String getStatus() {
         return status;
     }
 
+    // returns if the message channel is not null
     public boolean checkMessageChannel() {
         boolean channel = messageChannel == null;
         if (channel) status = "Channel provided could not be found!";
@@ -207,6 +215,7 @@ public class DiscordUtil implements EventListener {
         // something here in the future?
     }
 
+    // checks to see if a string is a valid hex code
     public boolean isValidHex(String str)
     {
         boolean ret = false;

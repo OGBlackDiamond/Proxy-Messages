@@ -6,6 +6,7 @@ ProxyMessages is a powerful Velocity plugin designed to unify your network’s m
 * Configurable Messages: Customize join, leave, and server switch messages with ease, tailoring them to fit the tone and style of your server network.
 * Multiple Message Variants: Create multiple potential messages for each event, allowing for variety and keeping the experience fresh for your players.
 * Custom Colors with HEX Support: Enhance your messages with custom colors using HEX codes to match your server's branding or aesthetic.
+* Abitility to instate network-wide resource packs.
 * Integration with DiscordSRV to keep your sever network connected over discord! 
 
 ### Configuration Overview:
@@ -13,6 +14,10 @@ All configurations are managed on the proxy side, meaning there’s no need to s
 
 #### Note:
 This plugin is only required to be on the proxy server. However, the vanilla "{player} has joined the game." messages will still appear. I reccommend using a plugin on all of your backend servers to remove this message. I created and built one for your convenience, but it has no correlation to the function of the proxy plugin. Use whatever plugin you like.
+
+#### **COLOR**:
+In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
+
 
 ### Key Configuration Options:
 * `global-network-join`: Toggle the join message for all users when a player joins the network.
@@ -22,8 +27,21 @@ This plugin is only required to be on the proxy server. However, the vanilla "{p
 * `leave-message-options`: Define a list of potential leave messages. Use {player} as a placeholder for the player’s username.
 * `switch-message-options`: Define a list of potential switch messages. Use {player}, {prev} for the previous server, and {cur} for the current server as placeholders.
 
-#### **COLOR**:
-In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
+### Resource Packs:
+This section discusses the ability to instate a network-wide resource pack
+
+Under the `network-resource-pack` section of your `config.yml`:
+
+`enabled`: toggles the resource pack on and off
+
+**Note:** None of the configuration from this point forward will not matter if `enabled` is `false`
+
+* `url`: The download url of your resource pack
+* `sha1-hash`: The hash of your resource pack 
+**NOTE**: At this time, a hash will do nothing, as I don't know how to properly translate it to a byte array. If you know how, please open a PR or Issue ticket on the github page for this project. 
+* `prompt`: The prompt users will recieve, inquiring abotu whether they want the resource pack
+* ` required`: whether or not the resource pack is required to play on the network
+
 
 ### Discord:
 This section discusses the discord integration functionality features and customizability.

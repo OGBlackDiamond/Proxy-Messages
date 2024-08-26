@@ -27,11 +27,28 @@ leave-message-options:
 switch-message-options:
   - "{player} left {prev} and joined {cur}"
 
+
+# options for a network-wide resource pack
+network-resource-pack:
+  # whether or not to use a resource pack
+  enabled: false
+  # the url of the resource pack
+  url: "pack.zip"
+  # the hash of the zip file
+  # - the hash currently does nothing, as I don't know how to properly parse this into a byte array
+  #   if you know, please open a PR or issue ticket on my github. Thanks.
+  sha1-hash: "hash" 
+  # the prompt that users will recieve when connecting
+  prompt: "{#ff2200}This proxy reccomends the use of a datapack for a better player experience."
+  # whether or not the resource pack is required to play on the network
+  required: false
+
+# options for discord SRV integration
 discord:
   # enables discord SRV mode
   enabled: false 
-  bot-token: "{token}"
-  channel-id: "{channel-id}"
+  bot-token: "token"
+  channel-id: "channel-id"
 
   # Color of the discord embed for join messages
   join-color: "#00ff00"

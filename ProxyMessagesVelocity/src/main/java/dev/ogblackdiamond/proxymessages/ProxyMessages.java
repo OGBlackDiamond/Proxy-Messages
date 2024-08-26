@@ -1,7 +1,5 @@
 package dev.ogblackdiamond.proxymessages;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -12,7 +10,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import com.velocitypowered.api.proxy.player.ResourcePackInfo;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
@@ -21,7 +19,6 @@ import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 import net.kyori.adventure.text.Component;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +44,20 @@ public class ProxyMessages {
 
     private MessageUtil messageUtil;
     private DiscordUtil discordUtil;
+
+    private boolean discordEnabled;
+
+    private boolean resourcePackEnabled;
+    
+    private boolean resourcePackRequired;
+
+    private String resourcePackUrl;
+
+    private byte[] resourcePackHash;
+
+    private Component resourcePackPrompt;
+
+    private ResourcePackInfo resourcePack;
 
     private boolean globalJoin;
     
@@ -100,27 +111,51 @@ public class ProxyMessages {
         switchMessageOptions = root.node("switch-message-options").getList(String.class);
 
         CommentedConfigurationNode discordOptions = root.node("discord");
+
+        discordEnabled = discordOptions.node("enabled").getBoolean();
             
-        if (!discordOptions.node("enabled").getBoolean()) return;
+        if (discordEnabled) {
 
-        discordUtil = new DiscordUtil(
-            this,
-            discordOptions
-        );
+            discordUtil = new DiscordUtil(
+                this,
+                discordOptions
+            );
 
-        String status = discordUtil.getStatus();
+            String status = discordUtil.getStatus();
 
-        if (!status.equals("good") || discordUtil.checkMessageChannel()) {
-            logger.error(status);
-            return;
-        }
+            if (!status.equals("good") || discordUtil.checkMessageChannel()) {
+                logger.error(status);
+                return;
+            }
         
-        discordUtil.proxyOnline();
+            discordUtil.proxyOnline();
+        } 
+
+        CommentedConfigurationNode resourcePackOptions = root.node("network-resource-pack");
+
+        resourcePackEnabled = resourcePackOptions.node("enabled").getBoolean();
+
+        if (resourcePackEnabled) {
+
+            resourcePackUrl = resourcePackOptions.node("url").getString();
+            resourcePackHash = resourcePackOptions.node("sha1-hash").getString().getBytes();
+            resourcePackRequired = resourcePackOptions.node("required").getBoolean();
+            resourcePackPrompt = messageUtil.compileColoredMessage(resourcePackOptions.node("prompt").getString());
+
+            ResourcePackInfo.Builder builder = server.createResourcePackBuilder(resourcePackUrl);
+            // builder.setHash(resourcePackHash);
+            builder.setPrompt(resourcePackPrompt);
+            builder.setShouldForce(resourcePackRequired);
+           
+            resourcePack = builder.build();
+        }
+
     }
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
-        discordUtil.proxyOffline();
+        if (discordUtil != null)
+            discordUtil.proxyOffline();
     }
 
     /**
@@ -128,6 +163,8 @@ public class ProxyMessages {
      */
     @Subscribe
     public void onPlayerConnect(ServerPostConnectEvent event) {
+
+        event.getPlayer().sendResourcePackOffer(resourcePack);
 
         if (event.getPreviousServer() != null && !globalSwitch) return;
 
@@ -147,7 +184,7 @@ public class ProxyMessages {
 
         sendMessage(
             messageUtil.compileFormattedMessage(
-                event.getPreviousServer() == null ? "join" : "switch",
+                previousServerNull ? "join" : "switch",
                 player.getUsername(),
                 previousServerNull ? "" : event.getPreviousServer().getServerInfo().getName(),
                 player.getCurrentServer().get().getServerInfo().getName(),
