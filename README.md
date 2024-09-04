@@ -40,7 +40,8 @@ Under the `network-resource-pack` section of your `config.yml`:
 * `sha1-hash`: The hash of your resource pack 
 **NOTE**: At this time, a hash will do nothing, as I don't know how to properly translate it to a byte array. If you know how, please open a PR or Issue ticket on the github page for this project. 
 * `prompt`: The prompt users will recieve, inquiring abotu whether they want the resource pack
-* ` required`: whether or not the resource pack is required to play on the network
+* ` required`: Whether or not the resource pack is required to play on the network
+* `except`: A list of servers to ignore when sending resource packs to players.
 
 
 ### Discord:

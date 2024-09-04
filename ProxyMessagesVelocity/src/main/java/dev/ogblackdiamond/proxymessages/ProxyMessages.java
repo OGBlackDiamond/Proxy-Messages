@@ -32,7 +32,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.4.0",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.4.1",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -59,6 +59,8 @@ public class ProxyMessages {
     private Component resourcePackPrompt;
 
     private ResourcePackInfo resourcePack;
+
+    private List<String> resourcePackExcept;
 
     private boolean globalJoin;
     
@@ -142,6 +144,7 @@ public class ProxyMessages {
             resourcePackHash = DatatypeConverter.parseHexBinary(resourcePackOptions.node("sha1-hash").getString());
             resourcePackRequired = resourcePackOptions.node("required").getBoolean();
             resourcePackPrompt = messageUtil.compileColoredMessage(resourcePackOptions.node("prompt").getString()).getComponent();
+            resourcePackExcept = resourcePackOptions.node("except").getList(String.class);
 
             ResourcePackInfo.Builder builder = server.createResourcePackBuilder(resourcePackUrl);
             builder.setHash(resourcePackHash);
@@ -164,10 +167,6 @@ public class ProxyMessages {
      */
     @Subscribe
     public void onPlayerConnect(ServerPostConnectEvent event) {
-
-        if (resourcePackEnabled)
-            event.getPlayer().sendResourcePackOffer(resourcePack);
-            event.getPlayer().sendResourcePacks(resourcePack);
 
         if (event.getPreviousServer() != null && !globalSwitch) return;
 
@@ -195,7 +194,12 @@ public class ProxyMessages {
             ),
             event.getPlayer().getUniqueId()
         );
-    }
+ 
+        if (resourcePackEnabled && !resourcePackExcept.contains(event.getPlayer().getCurrentServer().get().getServerInfo().getName())) {
+            event.getPlayer().sendResourcePacks(resourcePack);
+        }
+
+   }
 
     /**
      * Sends relevant information to backend server when player disconnects.

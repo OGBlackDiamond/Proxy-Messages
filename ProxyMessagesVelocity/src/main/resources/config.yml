@@ -42,6 +42,10 @@ network-resource-pack:
   prompt: "{#ff2200}This proxy reccomends the use of a datapack for a better player experience."
   # whether or not the resource pack is required to play on the network
   required: false
+  # a list of servers that will not have a resource pack applied to it
+  # I recomend this for modded servers because resource packs can cause issues there
+  except:
+    - "modded"
 
 # options for discord SRV integration
 discord:
