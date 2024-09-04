@@ -18,6 +18,7 @@ import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 
 import net.kyori.adventure.text.Component;
 
+import jakarta.xml.bind.DatatypeConverter;
 import java.util.List;
 import java.util.UUID;
 import java.io.IOException;
@@ -67,7 +68,7 @@ public class ProxyMessages {
 
     private List<String> joinMessageOptions;
     
-    private List <String> leaveMessageOptions;
+    private List<String> leaveMessageOptions;
 
     private List<String> switchMessageOptions;
 
@@ -138,12 +139,12 @@ public class ProxyMessages {
         if (resourcePackEnabled) {
 
             resourcePackUrl = resourcePackOptions.node("url").getString();
-            resourcePackHash = resourcePackOptions.node("sha1-hash").getString().getBytes();
+            resourcePackHash = DatatypeConverter.parseHexBinary(resourcePackOptions.node("sha1-hash").getString());
             resourcePackRequired = resourcePackOptions.node("required").getBoolean();
             resourcePackPrompt = messageUtil.compileColoredMessage(resourcePackOptions.node("prompt").getString()).getComponent();
 
             ResourcePackInfo.Builder builder = server.createResourcePackBuilder(resourcePackUrl);
-            // builder.setHash(resourcePackHash);
+            builder.setHash(resourcePackHash);
             builder.setPrompt(resourcePackPrompt);
             builder.setShouldForce(resourcePackRequired);
            
@@ -164,7 +165,9 @@ public class ProxyMessages {
     @Subscribe
     public void onPlayerConnect(ServerPostConnectEvent event) {
 
-        event.getPlayer().sendResourcePackOffer(resourcePack);
+        if (resourcePackEnabled)
+            event.getPlayer().sendResourcePackOffer(resourcePack);
+            event.getPlayer().sendResourcePacks(resourcePack);
 
         if (event.getPreviousServer() != null && !globalSwitch) return;
 

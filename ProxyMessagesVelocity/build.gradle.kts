@@ -19,6 +19,8 @@ dependencies {
     annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
 
     implementation("net.dv8tion:JDA:5.0.2")
+
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
 }
 
 java {
