@@ -115,7 +115,7 @@ public class DiscordUtil implements EventListener {
         
         try {
             jda.awaitReady();
-        } catch (InterruptedException e) {}
+        } catch (InterruptedException e) { }
 
         this.proxyMessages = proxyMessages;
         

@@ -150,7 +150,7 @@ public class ProxyMessages {
             builder.setHash(resourcePackHash);
             builder.setPrompt(resourcePackPrompt);
             builder.setShouldForce(resourcePackRequired);
-           
+
             resourcePack = builder.build();
         }
 
@@ -196,10 +196,10 @@ public class ProxyMessages {
         );
  
         if (resourcePackEnabled && !resourcePackExcept.contains(event.getPlayer().getCurrentServer().get().getServerInfo().getName())) {
-            event.getPlayer().sendResourcePacks(resourcePack);
+            event.getPlayer().sendResourcePackOffer(resourcePack);
         }
 
-   }
+    }
 
     /**
      * Sends relevant information to backend server when player disconnects.
