@@ -18,6 +18,16 @@ This plugin is only required to be on the proxy server. However, the vanilla "{p
 #### **COLOR**:
 In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
 
+#### **STYLING**
+In all message options, you can use Kyori Adventure TextDecoration options to further style your join options. Options include:
+* `{bold}` - text after this tag is bold
+* `{italic}` - text after this tag is italic 
+* `{strike}` - text after this tag has strikethroughs
+* `{underline}` - text after this tag is underlined
+* `{obfuscate}` - text after this tag is obfuscated
+
+Two sets of these tags will "open" and "close" their syle. For example, you can stylize a chunk of text by sandwitching it between the corresponding tags.
+
 
 ### Key Configuration Options:
 * `global-network-join`: Toggle the join message for all users when a player joins the network.
