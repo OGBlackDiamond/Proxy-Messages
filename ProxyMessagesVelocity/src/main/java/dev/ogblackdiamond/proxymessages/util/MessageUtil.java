@@ -8,6 +8,27 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public class MessageUtil {
 
+    private final String playerStr = "{player}";
+    private final int playerNameLength = playerStr.length(); 
+    private final String previousServerNameStr = "{prev}";
+    private final int previousServerNameLength = previousServerNameStr.length();
+    private final String newSeverNameStr = "{cur}";
+    private final int newServerNameLength = newSeverNameStr.length();
+
+    private final int colorLength = "{#xxxxxx}".length();
+
+    private final String boldStr = "{bold}";
+    private final int boldLength = boldStr.length();
+    private final String italicStr = "{italic}";
+    private final int italicLength = italicStr.length();
+    private final String strikeStr = "{strike}";
+    private final int strikeLength = strikeStr.length();
+    private final String underlineStr = "{underline}";
+    private final int underlineLength = underlineStr.length();
+    private final String obfuscateStr = "{obfuscate}";
+    private final int obfuscatedLength = obfuscateStr.length();
+
+
     // compiles the message, interpolating correct strings when needed.
     public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String chosenMessage) {
 
@@ -16,9 +37,6 @@ public class MessageUtil {
         String finalString = "";
 
         int messageLength = chosenMessage.length();
-        int playerNameLength = "{player}".length(); 
-        int previousServerNameLength = "{prev}".length();
-        int newServerNameLength = "{cur}".length();
 
         // builds the final component, interpolating the correct strings when need  
         for (int i = 0; i < messageLength; i++) {
@@ -27,15 +45,15 @@ public class MessageUtil {
             boolean newServerLength = i + newServerNameLength > messageLength;
             boolean previousServerLength = i + previousServerNameLength > messageLength;
 
-            if (!atLength && chosenMessage.substring(i, i + playerNameLength).equals("{player}")) {
+            if (!atLength && chosenMessage.substring(i, i + playerNameLength).equals(playerStr)) {
                 finalMessage.append(Component.text(playerName).decoration(TextDecoration.BOLD, true));
                 finalString += playerName;
                 i += playerNameLength - 1;
-            } else if (!previousServerLength && chosenMessage.substring(i, i + previousServerNameLength).equals("{prev}")) {
+            } else if (!previousServerLength && chosenMessage.substring(i, i + previousServerNameLength).equals(previousServerNameStr)) {
                 finalMessage.append(Component.text(previousServer).decoration(TextDecoration.BOLD, true));
                 finalString += previousServer;
                 i += previousServerNameLength - 1;
-            } else if (!newServerLength && chosenMessage.substring(i, i + newServerNameLength).equals("{cur}")) {
+            } else if (!newServerLength && chosenMessage.substring(i, i + newServerNameLength).equals(newSeverNameStr)) {
                 finalMessage.append(Component.text(newServer).decoration(TextDecoration.BOLD, true));
                 finalString += newServer;
                 i += newServerNameLength - 1;
@@ -58,19 +76,52 @@ public class MessageUtil {
         TextComponent.Builder finalMessage = Component.text();
         TextColor textColor = NamedTextColor.YELLOW;
 
-        String finalString = "";
+        boolean isBold = false;
+        boolean isItalic = false;
+        boolean isStrike = false;
+        boolean isUnderline = false;
+        boolean isObfuscated = false;
 
-        int colorLength = "{#xxxxxx}".length();
+        String finalString = "";
 
         for (int i = 0; i < coloredString.length(); i++) {
     
             boolean atColorLength = i + colorLength > coloredString.length();
 
+            boolean atBoldLengh = i + boldLength > coloredString.length();
+            boolean atItalicLength = i + italicLength > coloredString.length();
+            boolean atStrikeLength = i + strikeLength > coloredString.length();
+            boolean atUnderlineLength = i + underlineLength > coloredString.length();
+            boolean atObfuscateLength = i + obfuscatedLength > coloredString.length();
+
             if (!atColorLength && coloredString.substring(i, i + 2).equals("{#")) {
                 textColor = TextColor.fromCSSHexString(coloredString.substring(i + 1, i + colorLength - 1));
                 i += colorLength - 1;
+
+            } else if (!atBoldLengh && coloredString.substring(i, i + boldLength).equals(boldStr)) {
+                isBold = !isBold;
+                i += boldLength - 1;
+            } else if (!atItalicLength && coloredString.substring(i, i + italicLength).equals(italicStr)) {
+                isItalic = !isItalic;
+                i += italicLength - 1;
+            } else if (!atStrikeLength && coloredString.substring(i, i + strikeLength).equals(italicStr)) {
+                isStrike = !isStrike;
+                i += strikeLength - 1;
+            } else if (!atUnderlineLength && coloredString.substring(i, i + underlineLength).equals(underlineStr)) {
+                isUnderline = !isUnderline;
+                i += underlineLength - 1;
+            } else if (!atObfuscateLength && coloredString.substring(i, i + obfuscatedLength).equals(obfuscateStr)) {
+                isObfuscated = !isObfuscated;
+                i += obfuscatedLength - 1;
             } else {
-                finalMessage.append(Component.text(coloredString.substring(i, i + 1)).color(textColor).decoration(TextDecoration.BOLD, false));
+                finalMessage.append(Component.text(coloredString.substring(i, i + 1))
+                    .color(textColor)
+                    .decoration(TextDecoration.BOLD, isBold)
+                    .decoration(TextDecoration.ITALIC, isItalic)
+                    .decoration(TextDecoration.STRIKETHROUGH, isStrike)
+                    .decoration(TextDecoration.UNDERLINED, isUnderline)
+                    .decoration(TextDecoration.OBFUSCATED, isObfuscated)
+                );
                 finalString += coloredString.substring(i, i + 1);
             }
 
