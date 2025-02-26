@@ -32,7 +32,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.4.1",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.4.2",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
