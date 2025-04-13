@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.Player;
 import dev.ogblackdiamond.proxymessages.ProxyMessages;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,9 +19,11 @@ public final class GlobalMessagesCommand implements SimpleCommand {
 
 
     private ProxyMessages proxyMessages;
+    private HashMap<UUID, Boolean> playerGlobalChat;
 
-    public GlobalMessagesCommand(ProxyMessages proxyMessages) {
+    public GlobalMessagesCommand(ProxyMessages proxyMessages, HashMap<UUID, Boolean> playerGlobalChat) {
         this.proxyMessages = proxyMessages; 
+        this.playerGlobalChat = playerGlobalChat;
     }
 
     @Override
@@ -33,7 +36,9 @@ public final class GlobalMessagesCommand implements SimpleCommand {
             final String playerName = player.getUsername();
             final UUID playerUUID = player.getUniqueId();
 
-            boolean globalMessage = proxyMessages.togglePlayerGlobalChat(playerUUID);
+            proxyMessages.togglePlayerGlobalChat(playerUUID);
+            playerGlobalChat.replace(playerUUID, !playerGlobalChat.get(playerUUID));
+            boolean globalMessage = playerGlobalChat.get(playerUUID);
 
             source.sendMessage(Component.text(
                 "Your messages are now " + (globalMessage ? "global" : "local"),

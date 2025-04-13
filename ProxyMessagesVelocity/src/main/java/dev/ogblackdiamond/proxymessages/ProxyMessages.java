@@ -100,6 +100,8 @@ public class ProxyMessages {
 
         messageUtil = new MessageUtil();
 
+        playersGlobalChat = new HashMap<UUID, Boolean>();
+
         logger.info("Thank you for using ProxyMessages");
     }
 
@@ -130,7 +132,6 @@ public class ProxyMessages {
         leaveMessageOptions = root.node("leave-message-options").getList(String.class);
         switchMessageOptions = root.node("switch-message-options").getList(String.class);
 
-        globalMessagePrefix = root.node("switch-message-prefix").getString();
 
         CommentedConfigurationNode discordOptions = root.node("discord");
 
@@ -174,6 +175,8 @@ public class ProxyMessages {
         }
 
         if (globalMessages) {
+        
+            globalMessagePrefix = root.node("global-message-prefix").getString();
     
             CommandManager commandManager = server.getCommandManager();
 
@@ -182,7 +185,7 @@ public class ProxyMessages {
                 .plugin(this)
                 .build();
 
-            SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(this);
+            SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(this, playersGlobalChat);
 
             commandManager.register(commandMeta, globalMessagesCommand);
 
