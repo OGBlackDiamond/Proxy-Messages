@@ -1,8 +1,15 @@
 package dev.ogblackdiamond.proxymessages;
 
 import com.google.inject.Inject;
+import com.mojang.brigadier.Command;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.command.CommandExecuteEvent;
+import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -15,10 +22,12 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
 import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
-
+import dev.ogblackdiamond.proxymessages.util.GlobalMessagesCommand;
 import net.kyori.adventure.text.Component;
 
 import jakarta.xml.bind.DatatypeConverter;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.io.IOException;
@@ -67,12 +76,18 @@ public class ProxyMessages {
     private boolean globalLeave;
 
     private boolean globalSwitch;
+    
+    private boolean globalMessages;
 
     private List<String> joinMessageOptions;
     
     private List<String> leaveMessageOptions;
 
     private List<String> switchMessageOptions;
+
+    private String globalMessagePrefix;
+
+    private HashMap<UUID, Boolean> playersGlobalChat;
 
     /**
      * Constructor, initializes the logger and the proxy server.
@@ -108,10 +123,14 @@ public class ProxyMessages {
         globalLeave = root.node("global-network-leave").getBoolean();
 
         globalSwitch = root.node("global-network-switch").getBoolean();
+
+        globalMessages = root.node("global-messages").getBoolean();
         
         joinMessageOptions = root.node("join-message-options").getList(String.class);
         leaveMessageOptions = root.node("leave-message-options").getList(String.class);
         switchMessageOptions = root.node("switch-message-options").getList(String.class);
+
+        globalMessagePrefix = root.node("switch-message-prefix").getString();
 
         CommentedConfigurationNode discordOptions = root.node("discord");
 
@@ -154,6 +173,22 @@ public class ProxyMessages {
             resourcePack = builder.build();
         }
 
+        if (globalMessages) {
+    
+            CommandManager commandManager = server.getCommandManager();
+
+            CommandMeta commandMeta = commandManager.metaBuilder("toggleGM")
+                .aliases("tGM", "pmToggle")
+                .plugin(this)
+                .build();
+
+            SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(this);
+
+            commandManager.register(commandMeta, globalMessagesCommand);
+
+
+        }
+
     }
 
     @Subscribe
@@ -192,12 +227,15 @@ public class ProxyMessages {
                 player.getCurrentServer().get().getServerInfo().getName(),
                 message
             ),
-            event.getPlayer().getUniqueId()
+            event.getPlayer().getUniqueId(),
+            false
         );
- 
+
         if (resourcePackEnabled && !resourcePackExcept.contains(event.getPlayer().getCurrentServer().get().getServerInfo().getName())) {
             event.getPlayer().sendResourcePackOffer(resourcePack);
         }
+
+        playersGlobalChat.put(event.getPlayer().getUniqueId(), false);
 
     }
 
@@ -222,20 +260,49 @@ public class ProxyMessages {
                 "",
                 leaveMessageOptions.get((int) (Math.random() * leaveMessageOptions.size()))
             ),
-            event.getPlayer().getUniqueId()
+            event.getPlayer().getUniqueId(),
+            false
         );
+
+        playersGlobalChat.remove(event.getPlayer().getUniqueId());
     }
 
     public ProxyServer getProxy() {
         return server;
     }
 
-    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid) {
+    public boolean togglePlayerGlobalChat(UUID playerUUID) {
+        boolean currentToggle = playersGlobalChat.get(playerUUID);
+        playersGlobalChat.replace(playerUUID, currentToggle);
+        return currentToggle;
+    }
+
+    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid, boolean exceptPlayerServer) {
         for (RegisteredServer srvr : server.getAllServers()) {
-            if (!srvr.getPlayersConnected().isEmpty()) {
-                srvr.sendMessage(message.getComponent());
-            }
+            if (srvr.getPlayersConnected().isEmpty()) continue; 
+            if (exceptPlayerServer && srvr.getPlayersConnected().contains(server.getPlayer(uuid).get())) continue; 
+
+            srvr.sendMessage(message.getComponent());
         }
         if (discordUtil != null) discordUtil.playerNotification(message, uuid);
     }
+
+
+    @Subscribe
+    public void onPlayerMessage(PlayerChatEvent event) {
+        if (!globalMessages) return;
+        if (!playersGlobalChat.get(event.getPlayer().getUniqueId())) return;
+
+        MessageUtil.MessageReturns message = messageUtil.compileFormattedMessage(
+            "",
+            event.getPlayer().getUsername(),
+            "",
+            event.getPlayer().getCurrentServer().get().getServerInfo().getName(),
+            globalMessagePrefix + event.getMessage()
+        );
+        
+        sendMessage(message, event.getPlayer().getUniqueId(), true);
+
+    }
+
 }

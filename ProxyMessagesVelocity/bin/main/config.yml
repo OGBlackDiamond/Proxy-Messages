@@ -7,6 +7,9 @@ global-network-leave: true
 # enables a network-wide message that notifies players when a player switches between servers when true
 global-network-switch: true
 
+# enables a network-wide messaging system that allows players to communicate between servers on the proxy
+global-messages: true
+
 
 # for all message options, you can insert a hex code (example: {#ff0066}). Characters after this hex code will turn the color of the code. Multiple hex codes can be used to make a string multicolored.
 # you can also insert tags like {bold} and {italic} to style your messages. Please refer to the documentation for this plugin for more information.
@@ -28,6 +31,11 @@ leave-message-options:
 switch-message-options:
   - "{player} left {prev} and joined {cur}"
 
+
+# the prefix to global messages on other servers
+# {cur} will be replaced by the current server
+# {player} will be replaced by the player's name
+global-message-prefix: "[{cur}] - {player}: "
 
 # options for a network-wide resource pack
 network-resource-pack:
