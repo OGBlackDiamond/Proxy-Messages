@@ -270,27 +270,6 @@ public class ProxyMessages {
         playersGlobalChat.remove(event.getPlayer().getUniqueId());
     }
 
-    public ProxyServer getProxy() {
-        return server;
-    }
-
-    public boolean togglePlayerGlobalChat(UUID playerUUID) {
-        boolean currentToggle = playersGlobalChat.get(playerUUID);
-        playersGlobalChat.replace(playerUUID, currentToggle);
-        return currentToggle;
-    }
-
-    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid, boolean exceptPlayerServer) {
-        for (RegisteredServer srvr : server.getAllServers()) {
-            if (srvr.getPlayersConnected().isEmpty()) continue; 
-            if (exceptPlayerServer && srvr.getPlayersConnected().contains(server.getPlayer(uuid).get())) continue; 
-
-            srvr.sendMessage(message.getComponent());
-        }
-        if (discordUtil != null) discordUtil.playerNotification(message, uuid);
-    }
-
-
     @Subscribe
     public void onPlayerMessage(PlayerChatEvent event) {
         if (!globalMessages) return;
@@ -307,5 +286,21 @@ public class ProxyMessages {
         sendMessage(message, event.getPlayer().getUniqueId(), true);
 
     }
+
+
+    public ProxyServer getProxy() {
+        return server;
+    }
+
+    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid, boolean exceptPlayerServer) {
+        for (RegisteredServer srvr : server.getAllServers()) {
+            if (srvr.getPlayersConnected().isEmpty()) continue; 
+            if (exceptPlayerServer && srvr.getPlayersConnected().contains(server.getPlayer(uuid).get())) continue; 
+
+            srvr.sendMessage(message.getComponent());
+        }
+        if (discordUtil != null && !exceptPlayerServer) discordUtil.playerNotification(message, uuid);
+    }
+
 
 }
