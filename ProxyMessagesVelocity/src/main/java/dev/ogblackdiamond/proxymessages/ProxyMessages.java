@@ -213,7 +213,7 @@ public class ProxyMessages {
 
         String message;
 
-        if (event.getPreviousServer() == null) {
+        if (previousServerNull) {
             message = joinMessageOptions.get((int) (Math.random() * joinMessageOptions.size()));
         } else {
             message = switchMessageOptions.get((int) (Math.random() * switchMessageOptions.size()));
@@ -235,7 +235,7 @@ public class ProxyMessages {
             event.getPlayer().sendResourcePackOffer(resourcePack);
         }
 
-        playersGlobalChat.put(event.getPlayer().getUniqueId(), false);
+        if (previousServerNull) playersGlobalChat.put(event.getPlayer().getUniqueId(), false);
 
     }
 
