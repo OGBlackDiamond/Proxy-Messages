@@ -2,7 +2,10 @@
 ## Unified Join, Leave, and Server Switch Messages for Your Velocity/Paper Network
 ProxyMessages is a powerful Velocity plugin designed to unify your network’s messaging system across all servers. With ProxyMessages, your players will receive consistent and configurable notifications whenever someone joins, leaves, or switches between servers in your network. Whether you run a small network or a large-scale operation, ProxyMessages helps you deliver a seamless player experience by synchronizing key messages across your entire server network.
 
+Join [my Discord!](https://discord.gg/C2PJNTN97u)
+
 ## Key Features:
+* Global messages so players can communicate with one another, even if they aren't connected to the same server.
 * Configurable Messages: Customize join, leave, and server switch messages with ease, tailoring them to fit the tone and style of your server network.
 * Multiple Message Variants: Create multiple potential messages for each event, allowing for variety and keeping the experience fresh for your players.
 * Custom Colors with HEX Support: Enhance your messages with custom colors using HEX codes to match your server's branding or aesthetic.
@@ -13,7 +16,7 @@ ProxyMessages is a powerful Velocity plugin designed to unify your network’s m
 All configurations are managed on the proxy side, meaning there’s no need to synchronize settings across individual backend servers. Simply edit the `config.yml` file located in `plugins/proxymessages/` on your proxy server to get started.
 
 #### Note:
-This plugin is only required to be on the proxy server. However, the vanilla "{player} has joined the game." messages will still appear. I reccommend using a plugin on all of your backend servers to remove this message. I created and built one for your convenience, but it has no correlation to the function of the proxy plugin. Use whatever plugin you like.
+This plugin is only required to be on the proxy server. However, the vanilla "{player} has joined the game." messages will still appear. I reccommend using a plugin on all of your backend servers to remove this message. I created and built one for your convenience, but it has no correlation to the function of the proxy plugin. Use whatever plugin you like. **The build of the server-side plugin is no longer included in releases 3.0.0 and above**. If you'd like to use the server-side plugin to remove the default join and leave messages, please find an old realease, and download from there, or build a new one. 
 
 #### **COLOR**:
 In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
@@ -33,9 +36,21 @@ Two sets of these tags will "open" and "close" their syle. For example, you can 
 * `global-network-join`: Toggle the join message for all users when a player joins the network.
 * `global-network-leave`: Toggle the leave message for all users when a player leaves the network.
 * `global-network-switch`: Toggle the server switch message for all users when a player moves between servers.
+* `global-messages`: Toggle the server's ability to send player's messages across all servers.
 * `join-message-options`: Define a list of potential join messages. Use {player} as a placeholder for the player’s username.
 * `leave-message-options`: Define a list of potential leave messages. Use {player} as a placeholder for the player’s username.
 * `switch-message-options`: Define a list of potential switch messages. Use {player}, {prev} for the previous server, and {cur} for the current server as placeholders.
+* `global-message-prefix`: The prefix to global messages for other servers. Use {player} for the player sending the message, and {cur} as the server they're sending the message from.
+
+### Global Player Messaging:
+Once `global-messages` is enabled, players can toggle their messages between "global" and "local" by using any of the following commands (aliases used for convenience):
+* `toggleGM`
+* `tGM`
+* `pmToggle`
+
+**Global messages** mean that the user's messages will be displayed in the server they are connected to, as well as all other servers on the network.
+
+**Local messages** mean that the user's messages will only be displayed in the server they are connected to.
 
 ### Resource Packs:
 This section discusses the ability to instate a network-wide resource pack
