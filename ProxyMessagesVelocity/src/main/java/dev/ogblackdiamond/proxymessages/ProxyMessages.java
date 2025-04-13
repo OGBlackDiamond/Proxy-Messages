@@ -1,13 +1,10 @@
 package dev.ogblackdiamond.proxymessages;
 
 import com.google.inject.Inject;
-import com.mojang.brigadier.Command;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.command.CommandExecuteEvent;
-import com.velocitypowered.api.event.command.PlayerAvailableCommandsEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
@@ -41,7 +38,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "2.5.0",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.0",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -185,7 +182,7 @@ public class ProxyMessages {
                 .plugin(this)
                 .build();
 
-            SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(this, playersGlobalChat);
+            SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(playersGlobalChat);
 
             commandManager.register(commandMeta, globalMessagesCommand);
 
