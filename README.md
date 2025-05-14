@@ -4,6 +4,8 @@ ProxyMessages is a powerful Velocity plugin designed to unify your network’s m
 
 Join [my Discord!](https://discord.gg/C2PJNTN97u)
 
+![Usage Examples](https://github.com/user-attachments/assets/fe5e1ed0-9c39-49ef-b246-d282ac1a4d0f)
+
 ## Key Features:
 * Global messages so players can communicate with one another, even if they aren't connected to the same server.
 * Configurable Messages: Customize join, leave, and server switch messages with ease, tailoring them to fit the tone and style of your server network.
