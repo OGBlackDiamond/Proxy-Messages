@@ -1,8 +1,10 @@
 # Proxy-Messages
-## Unified Join, Leave, and Server Switch Messages for Your Velocity/Paper Network
-ProxyMessages is a powerful Velocity plugin designed to unify your network’s messaging system across all servers. With ProxyMessages, your players will receive consistent and configurable notifications whenever someone joins, leaves, or switches between servers in your network. Whether you run a small network or a large-scale operation, ProxyMessages helps you deliver a seamless player experience by synchronizing key messages across your entire server network.
+## Unified System and Player Messages for Your Velocity/Paper Network
+ProxyMessages is a powerful Velocity plugin designed to unify your network’s messaging system across all servers. ProxyMessages can be configured to send messages to players across all servers for player chat messages, proxy connections, disconnections, and server changes. Whether you run a small network or a large-scale operation, ProxyMessages helps you deliver a seamless player experience by synchronizing key messages across your entire server network.
 
 Join [my Discord!](https://discord.gg/C2PJNTN97u)
+
+![Usage Examples](https://github.com/user-attachments/assets/fe5e1ed0-9c39-49ef-b246-d282ac1a4d0f)
 
 ## Key Features:
 * Global messages so players can communicate with one another, even if they aren't connected to the same server.
