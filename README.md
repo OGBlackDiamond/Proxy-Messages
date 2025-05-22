@@ -48,6 +48,8 @@ Once `global-messages` is enabled, players can toggle their messages between "gl
 * `tGM`
 * `pmToggle`
 
+#### `global-message-defaults` is whether or not player's messages will be global by default (they can still be toggled if true)
+
 **Global messages** mean that the user's messages will be displayed in the server they are connected to, as well as all other servers on the network.
 
 **Local messages** mean that the user's messages will only be displayed in the server they are connected to.

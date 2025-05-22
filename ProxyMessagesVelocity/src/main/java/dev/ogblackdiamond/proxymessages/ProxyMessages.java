@@ -18,6 +18,7 @@ import com.velocitypowered.api.proxy.player.ResourcePackInfo;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
+import dev.ogblackdiamond.proxymessages.util.Metrics;
 import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 import dev.ogblackdiamond.proxymessages.util.GlobalMessagesCommand;
 import net.kyori.adventure.text.Component;
@@ -38,13 +39,14 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.1",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.3",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
 
     private final ProxyServer server;
     private final Logger logger;
+    private final Metrics.Factory metricsFactory;
 
     @DataDirectory
     private final Path dataDirectory;
@@ -84,15 +86,18 @@ public class ProxyMessages {
 
     private String globalMessagePrefix;
 
+    private boolean globalMessageDefault;
+
     private HashMap<UUID, Boolean> playersGlobalChat;
 
     /**
      * Constructor, initializes the logger and the proxy server.
      */
     @Inject
-    public ProxyMessages(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    public ProxyMessages(ProxyServer server, Logger logger, Metrics.Factory metricsFactory, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.logger = logger;
+        this.metricsFactory = metricsFactory;
         this.dataDirectory = dataDirectory;
 
         messageUtil = new MessageUtil();
@@ -104,6 +109,10 @@ public class ProxyMessages {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
+
+        int pluginID = 25855;
+        Metrics metrics = metricsFactory.make(this, pluginID);
+
         if (Files.notExists(dataDirectory)) {
             Files.createDirectory(dataDirectory);
         }
@@ -174,6 +183,8 @@ public class ProxyMessages {
         if (globalMessages) {
         
             globalMessagePrefix = root.node("global-message-prefix").getString();
+
+            globalMessageDefault = root.node("global-message-default").getBoolean();
     
             CommandManager commandManager = server.getCommandManager();
 
@@ -235,7 +246,7 @@ public class ProxyMessages {
             event.getPlayer().sendResourcePackOffer(resourcePack);
         }
 
-        if (previousServerNull) playersGlobalChat.put(event.getPlayer().getUniqueId(), false);
+        if (previousServerNull && globalMessages) playersGlobalChat.put(event.getPlayer().getUniqueId(), globalMessageDefault);
 
     }
 

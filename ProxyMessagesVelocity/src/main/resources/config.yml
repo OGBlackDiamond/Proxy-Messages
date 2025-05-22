@@ -37,6 +37,9 @@ switch-message-options:
 # {player} will be replaced by the player's name
 global-message-prefix: "[{cur}] - {player}: "
 
+# whether player's messages will be global by default
+global-message-default: true
+
 # options for a network-wide resource pack
 network-resource-pack:
   # whether or not to use a resource pack
