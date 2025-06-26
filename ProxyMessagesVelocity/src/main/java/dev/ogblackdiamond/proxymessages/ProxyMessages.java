@@ -20,11 +20,12 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
 import dev.ogblackdiamond.proxymessages.util.Metrics;
 import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
-import dev.ogblackdiamond.proxymessages.util.GlobalMessagesCommand;
+import dev.ogblackdiamond.proxymessages.commands.GlobalMessagesCommand;
+import dev.ogblackdiamond.proxymessages.commands.Reload;
 import net.kyori.adventure.text.Component;
-
 import jakarta.xml.bind.DatatypeConverter;
 
+import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.3",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.4",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -109,6 +110,12 @@ public class ProxyMessages {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
+
+        initialize(0);
+
+    }
+
+    public void initialize(int test) throws IOException {
 
         int pluginID = 25855;
         Metrics metrics = metricsFactory.make(this, pluginID);
@@ -180,13 +187,29 @@ public class ProxyMessages {
             resourcePack = builder.build();
         }
 
+        // initialize command stuff
+        CommandManager commandManager = server.getCommandManager();
+        
+        CommandMeta reloadCommandMeta = commandManager.metaBuilder("pmReload")
+            .aliases("reloadPM")
+            .build();
+
+        SimpleCommand reloadCommand = new Reload(
+            arg0 -> {
+                try {initialize(arg0);}
+                catch (IOException e) {e.printStackTrace();}
+            }
+        );
+
+        commandManager.register(reloadCommandMeta, reloadCommand);
+
+        // optional global messages
         if (globalMessages) {
         
             globalMessagePrefix = root.node("global-message-prefix").getString();
 
             globalMessageDefault = root.node("global-message-default").getBoolean();
     
-            CommandManager commandManager = server.getCommandManager();
 
             CommandMeta commandMeta = commandManager.metaBuilder("toggleGM")
                 .aliases("tGM", "pmToggle")
@@ -196,7 +219,6 @@ public class ProxyMessages {
             SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(playersGlobalChat);
 
             commandManager.register(commandMeta, globalMessagesCommand);
-
 
         }
 

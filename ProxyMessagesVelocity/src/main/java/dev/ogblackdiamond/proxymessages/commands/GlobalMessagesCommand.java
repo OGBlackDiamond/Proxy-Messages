@@ -1,4 +1,4 @@
-package dev.ogblackdiamond.proxymessages.util;
+package dev.ogblackdiamond.proxymessages.commands;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
