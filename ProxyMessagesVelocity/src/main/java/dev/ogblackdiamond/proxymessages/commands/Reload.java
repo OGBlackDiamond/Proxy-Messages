@@ -31,6 +31,9 @@ public final class Reload implements SimpleCommand {
         ));
         
         try {reloadMethod.accept(0);}
-        catch (Exception e) {e.printStackTrace();}
+        catch (Exception e) {
+            System.out.println("[ProxyMessages]: Reload failed:");
+            e.printStackTrace();
+        }
     }
 }

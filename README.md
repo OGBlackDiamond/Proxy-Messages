@@ -17,8 +17,8 @@ Join [my Discord!](https://discord.gg/C2PJNTN97u)
 ### Configuration Overview:
 All configurations are managed on the proxy side, meaning there’s no need to synchronize settings across individual backend servers. Simply edit the `config.yml` file located in `plugins/proxymessages/` on your proxy server to get started.
 
-#### Note:
-This plugin is only required to be on the proxy server. However, the vanilla "{player} has joined the game." messages will still appear. I reccommend using a plugin on all of your backend servers to remove this message. I created and built one for your convenience, but it has no correlation to the function of the proxy plugin. Use whatever plugin you like. **The build of the server-side plugin is no longer included in releases 3.0.0 and above**. If you'd like to use the server-side plugin to remove the default join and leave messages, please find an old realease, and download from there, or build a new one. 
+### The Paper Plugin:
+ProxyMessages can work standalone on a velocity server. However, due to limitations in the velocity API, it cannot edit or change the vanilla messages that normally appear on servers. These include the vanilla join and leave messages, as well as vanilla chat messages on the server that the player is connected to. If you'd like remove the vanilla join and leave messages, and format chat messages, please use the provided paper plugin on all of your backend servers. Once the paper plugin is installed, the aforementioned features will automatically start working. No extra configuration is needed.
 
 #### **COLOR**:
 In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.

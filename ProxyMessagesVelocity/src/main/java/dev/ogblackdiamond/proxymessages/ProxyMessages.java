@@ -1,11 +1,14 @@
 package dev.ogblackdiamond.proxymessages;
 
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -14,6 +17,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.player.ResourcePackInfo;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
@@ -25,7 +29,6 @@ import dev.ogblackdiamond.proxymessages.commands.Reload;
 import net.kyori.adventure.text.Component;
 import jakarta.xml.bind.DatatypeConverter;
 
-import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
@@ -91,6 +93,8 @@ public class ProxyMessages {
 
     private HashMap<UUID, Boolean> playersGlobalChat;
 
+    public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("proxymessages:main");
+
     /**
      * Constructor, initializes the logger and the proxy server.
      */
@@ -111,11 +115,13 @@ public class ProxyMessages {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
 
+        server.getChannelRegistrar().register(IDENTIFIER);
+
         initialize(0);
 
     }
 
-    public void initialize(int test) throws IOException {
+    public void initialize(int dummy) throws IOException {
 
         int pluginID = 25855;
         Metrics metrics = metricsFactory.make(this, pluginID);
@@ -303,7 +309,7 @@ public class ProxyMessages {
     @Subscribe
     public void onPlayerMessage(PlayerChatEvent event) {
         if (!globalMessages) return;
-        if (!playersGlobalChat.get(event.getPlayer().getUniqueId())) return;
+        if (globalMessages && !playersGlobalChat.get(event.getPlayer().getUniqueId())) return;
 
         MessageUtil.MessageReturns message = messageUtil.compileFormattedMessage(
             "",
@@ -312,24 +318,55 @@ public class ProxyMessages {
             event.getPlayer().getCurrentServer().get().getServerInfo().getName(),
             globalMessagePrefix + event.getMessage()
         );
-        
+
         sendMessage(message, event.getPlayer().getUniqueId(), true);
 
+    }
+
+    @Subscribe
+    public void onPluginMessageFromBackend(PluginMessageEvent event) {
+
+        if (!IDENTIFIER.equals(event.getIdentifier())) return;
+
+        ByteArrayDataInput data = ByteStreams.newDataInput(event.getData());
+
+        String playerName = data.readUTF();
+        long playerLSB = data.readLong();
+        long playerMSB = data.readLong();
+        UUID playerUUID = new UUID(playerMSB, playerLSB);
+        String messageData = data.readUTF();
+
+        String serverNameRaw = event.getSource().toString();
+        int serverNameIndex = serverNameRaw.indexOf("->");
+        String serverName = serverNameRaw.substring(serverNameIndex + 3);
+
+
+        MessageUtil.MessageReturns message = messageUtil.compileFormattedMessage(
+            "",
+            playerName,
+            "",
+            serverName,
+            globalMessagePrefix + messageData
+        );
+
+        sendMessage(message, playerUUID, false);
+
+    }
+
+
+    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid, boolean exceptPlayerServer) {
+        for (RegisteredServer srvr : server.getAllServers()) {
+            if (srvr.getPlayersConnected().isEmpty()) continue; 
+            if (exceptPlayerServer && srvr.getPlayersConnected().contains(server.getPlayer(uuid).get())) continue;
+
+            srvr.sendMessage(message.getComponent());
+        }
+        if (discordUtil != null && !exceptPlayerServer) discordUtil.playerNotification(message, uuid);
     }
 
 
     public ProxyServer getProxy() {
         return server;
-    }
-
-    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid, boolean exceptPlayerServer) {
-        for (RegisteredServer srvr : server.getAllServers()) {
-            if (srvr.getPlayersConnected().isEmpty()) continue; 
-            if (exceptPlayerServer && srvr.getPlayersConnected().contains(server.getPlayer(uuid).get())) continue; 
-
-            srvr.sendMessage(message.getComponent());
-        }
-        if (discordUtil != null && !exceptPlayerServer) discordUtil.playerNotification(message, uuid);
     }
 
 
