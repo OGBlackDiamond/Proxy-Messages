@@ -44,6 +44,10 @@ Two sets of these tags will "open" and "close" their syle. For example, you can 
 * `switch-message-options`: Define a list of potential switch messages. Use {player}, {prev} for the previous server, and {cur} for the current server as placeholders.
 * `global-message-prefix`: The prefix to global messages for other servers. Use {player} for the player sending the message, and {cur} as the server they're sending the message from.
 
+### Config Reloading
+The configuration for this plugin can reload on the fly!
+Simply make changes to your config file and use either `pmReload` or `reloadPM`, and the config changes will take effect!
+
 ### Global Player Messaging:
 Once `global-messages` is enabled, players can toggle their messages between "global" and "local" by using any of the following commands (aliases used for convenience):
 * `toggleGM`
