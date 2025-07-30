@@ -1,30 +1,41 @@
 package dev.ogblackdiamond.proxymessages.util;
 
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map; import java.util.Set;
 import java.util.UUID;
 import java.util.regex.*;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.ProxyMessages;
+import dev.ogblackdiamond.proxymessages.util.MessageUtil;
+import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class DiscordUtil implements EventListener { 
 
     private JDA jda;
 
-    ProxyMessages proxyMessages;
+    private ProxyMessages proxyMessages;
+
+    private MessageUtil messageUtil;
 
     private TextChannel messageChannel;
 
@@ -34,38 +45,52 @@ public class DiscordUtil implements EventListener {
 
     private boolean imageExists;
 
-    String botToken;
+    private String botToken;
 
-    String channelID;
+    private String proxyChannelID;
 
+    private HashMap<String, TextChannel> serverNameIDPairs;
+
+    CommentedConfigurationNode serverChannelPairsNode;
     CommentedConfigurationNode textConfiguration;
     
-    String onlineMessage;
+    private String onlineMessage;
 
-    String offlineMessage;
+    private String offlineMessage;
 
-    boolean serverCount;
+    private String playerMessagePrefix;
 
-    boolean displayIcon;
+    private boolean serverCount;
 
-    Color joinColor;
-    Color leaveColor;
-    Color switchColor;
+    private boolean displayIcon;
+
+    private Color joinColor;
+    private Color leaveColor;
+    private Color switchColor;
 
 
-    public DiscordUtil(ProxyMessages proxyMessages, CommentedConfigurationNode configNode) {
+    public DiscordUtil(ProxyMessages proxyMessages, CommentedConfigurationNode configNode) throws SerializationException {
 
         // load all discord values from config
-
+        
         botToken =  configNode.node("bot-token").getString();
 
-        channelID = configNode.node("channel-id").getString();
+        proxyChannelID = configNode.node("proxy-channel-id").getString();
+
+        serverNameIDPairs = new HashMap<String, TextChannel>();
+
+        serverChannelPairsNode = configNode.node("server-channel-ids");
+
+        Map<Object, CommentedConfigurationNode> serverChannels = serverChannelPairsNode.childrenMap();
+        Set<Object> servers = serverChannels.keySet();
 
         textConfiguration = configNode.node("text-configuration");
 
         onlineMessage = textConfiguration.node("online-message").getString();
 
         offlineMessage = textConfiguration.node("offline-message").getString();
+
+        playerMessagePrefix = textConfiguration.node("player-message-prefix").getString();
 
         serverCount = textConfiguration.node("server-count").getBoolean();
         
@@ -84,7 +109,17 @@ public class DiscordUtil implements EventListener {
             imageExists = false;
         }
 
-        if (botToken.substring(0, 1).equals("{") || channelID.substring(0, 1).equals("{")) {
+        
+        boolean validChannelIDs = true;
+
+        for (String id : serverNameIDPairs.keySet()) {
+            if (id.substring(0, 1).equals("^")) {
+                validChannelIDs = false;
+                break;
+            }
+        }
+
+        if (botToken.substring(0, 1).equals("^") || proxyChannelID.substring(0, 1).equals("^") || !validChannelIDs) {
             status = "Invalid channel or token provided!";
             return;
         }
@@ -111,6 +146,7 @@ public class DiscordUtil implements EventListener {
         // creates the jda wrapper
         jda = JDABuilder.createDefault(botToken)
             .addEventListeners(this)
+            .enableIntents(GatewayIntent.MESSAGE_CONTENT)
             .build();
         
         try {
@@ -118,16 +154,30 @@ public class DiscordUtil implements EventListener {
         } catch (InterruptedException e) { }
 
         this.proxyMessages = proxyMessages;
+        messageUtil = proxyMessages.getMessageUtil();
         
-
         // a null check should be be performed in another class after construction
-        messageChannel = jda.getChannelById(TextChannel.class, channelID);
+        messageChannel = jda.getChannelById(TextChannel.class, proxyChannelID);
+
+        for (Object object : servers) {
+            serverNameIDPairs.put(
+                object.toString(),
+                jda.getChannelById(TextChannel.class, serverChannels.get(object).getString())
+            );
+        }
+
         status = "good";
     }
 
-    // sends a message in the given message channel
+
+    // sends a message in the proxy message channel
     public void sendMessage(String message) {
         messageChannel.sendMessageFormat(message).complete();
+    }
+
+    // send a message in the given channel
+    public void sendMessage(String message, String serverName) {
+        serverNameIDPairs.get(serverName).sendMessageFormat(message).complete();
 
     }
 
@@ -137,7 +187,8 @@ public class DiscordUtil implements EventListener {
         String serversList = "";
 
         for (RegisteredServer server : proxyMessages.getProxy().getAllServers()) {
-            serversList += "* " + server.getServerInfo().getName() + "\n";
+            String serverName = server.getServerInfo().getName();
+            serversList += "* " + serverName + "\n";
         }
 
         EmbedBuilder builder = new EmbedBuilder()
@@ -176,7 +227,7 @@ public class DiscordUtil implements EventListener {
     // handles sending messages when player action happens on the proxy
     public void playerNotification(MessageUtil.MessageReturns message, UUID uuid) {
         Color messageColor = new Color(20, 20, 200);
-        switch(message.getType()){
+        switch(message.getType()) {
             case "join": {
                 messageColor = joinColor;
                 break;
@@ -189,7 +240,9 @@ public class DiscordUtil implements EventListener {
                 messageColor = switchColor;
                 break;
             }
-            default: {}
+            default: {
+                return;
+            }
         }
         EmbedBuilder builder = new EmbedBuilder()
             .setColor(messageColor)
@@ -203,6 +256,10 @@ public class DiscordUtil implements EventListener {
         return status;
     }
 
+    public String getPlayerMessagePrefix() {
+        return playerMessagePrefix;
+    }
+
     // returns if the message channel is not null
     public boolean checkMessageChannel() {
         boolean channel = messageChannel == null;
@@ -212,7 +269,27 @@ public class DiscordUtil implements EventListener {
 
     @Override
     public void onEvent(GenericEvent event) {
-        // something here in the future?
+        if (event.getClass() != MessageReceivedEvent.class) return;
+        MessageReceivedEvent messageEvent = (MessageReceivedEvent) event;
+        
+        if (messageEvent.getAuthor().isBot() || messageEvent.getAuthor().isSystem()) return;
+
+        String channelID = messageEvent.getChannel().getId();
+        for (TextChannel channel : serverNameIDPairs.values()) {
+            if (channel.getId().equals(channelID)) {
+
+                MessageReturns message = messageUtil.compileFormattedMessage(
+                    "",
+                    messageEvent.getAuthor().getEffectiveName(),
+                    "",
+                    "Discord",
+                    proxyMessages.getGlobalMessagePrefix() + messageEvent.getMessage().getContentRaw()
+                );
+
+                proxyMessages.sendMessage(message);
+                break;
+            }
+        }
     }
 
     // checks to see if a string is a valid hex code

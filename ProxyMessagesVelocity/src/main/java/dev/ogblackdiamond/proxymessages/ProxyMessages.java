@@ -23,6 +23,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
 import dev.ogblackdiamond.proxymessages.util.Metrics;
+import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
 import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 import dev.ogblackdiamond.proxymessages.commands.GlobalMessagesCommand;
 import dev.ogblackdiamond.proxymessages.commands.Reload;
@@ -308,18 +309,21 @@ public class ProxyMessages {
 
     @Subscribe
     public void onPlayerMessage(PlayerChatEvent event) {
-        if (!globalMessages) return;
-        if (globalMessages && !playersGlobalChat.get(event.getPlayer().getUniqueId())) return;
+        
+        String serverName = event.getPlayer().getCurrentServer().get().getServerInfo().getName();
 
         MessageUtil.MessageReturns message = messageUtil.compileFormattedMessage(
             "",
             event.getPlayer().getUsername(),
             "",
             event.getPlayer().getCurrentServer().get().getServerInfo().getName(),
-            globalMessagePrefix + event.getMessage()
+            (globalMessages ? globalMessagePrefix : discordUtil.getPlayerMessagePrefix()) + event.getMessage()
         );
 
-        sendMessage(message, event.getPlayer().getUniqueId(), true);
+        discordUtil.sendMessage(message.getString(), serverName);
+
+        // handles global messages
+        if (globalMessages && playersGlobalChat.get(event.getPlayer().getUniqueId())) sendMessage(message, event.getPlayer().getUniqueId(), true);
 
     }
 
@@ -364,9 +368,21 @@ public class ProxyMessages {
         if (discordUtil != null && !exceptPlayerServer) discordUtil.playerNotification(message, uuid);
     }
 
+    public void sendMessage(MessageReturns message) {
+        sendMessage(message, new UUID(0, 0), false);
+    }
+
 
     public ProxyServer getProxy() {
         return server;
+    }
+
+    public MessageUtil getMessageUtil() {
+        return messageUtil;
+    }
+
+    public String getGlobalMessagePrefix() {
+        return globalMessagePrefix;
     }
 
 

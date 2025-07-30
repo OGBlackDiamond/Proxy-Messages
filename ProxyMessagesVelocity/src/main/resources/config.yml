@@ -63,8 +63,16 @@ network-resource-pack:
 discord:
   # enables discord SRV mode
   enabled: false 
-  bot-token: "token"
-  channel-id: "channel-id"
+  bot-token: "^token"
+
+  proxy-channel-id: "^channel-id"
+
+  # the channel IDs in order of how they appear in your velocity.toml
+  # the name of the server and it's corresponding discord channel id
+  server-channel-ids: 
+    ^lobby: "lobby-channel-id"
+    ^vanilla: "vanilla-channel-id"
+
 
   # Color of the discord embed for join messages
   join-color: "#00ff00"
@@ -78,6 +86,10 @@ discord:
   text-configuration:
     online-message: "## Proxy Online"
     offline-message: "## Proxy Offline"
+
+    # a prefix to player messages in discord
+    # this only applies when global messaging is disabled
+    player-message-prefix: "<{player}>: "
 
     # on proxy startup, lists available servers
     server-count: true
