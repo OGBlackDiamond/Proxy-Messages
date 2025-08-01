@@ -43,7 +43,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.4",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.5",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -136,6 +136,7 @@ public class ProxyMessages {
                 Files.copy(stream, config);
             }
         }
+        
 
         final YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(config).build();
         final CommentedConfigurationNode root = loader.load();
@@ -358,7 +359,7 @@ public class ProxyMessages {
     }
 
 
-    private void sendMessage(MessageUtil.MessageReturns message, UUID uuid, boolean exceptPlayerServer) {
+    private void sendMessage(MessageReturns message, UUID uuid, boolean exceptPlayerServer) {
         for (RegisteredServer srvr : server.getAllServers()) {
             if (srvr.getPlayersConnected().isEmpty()) continue; 
             if (exceptPlayerServer && srvr.getPlayersConnected().contains(server.getPlayer(uuid).get())) continue;
@@ -372,6 +373,10 @@ public class ProxyMessages {
         sendMessage(message, new UUID(0, 0), false);
     }
 
+    public void sendMessageToServer(MessageReturns message, String serverName) {
+        server.getServer(serverName).get().sendMessage(message.getComponent()); 
+    }
+
 
     public ProxyServer getProxy() {
         return server;
@@ -383,6 +388,10 @@ public class ProxyMessages {
 
     public String getGlobalMessagePrefix() {
         return globalMessagePrefix;
+    }
+
+    public boolean getGlobalMessages() {
+        return globalMessages;
     }
 
 

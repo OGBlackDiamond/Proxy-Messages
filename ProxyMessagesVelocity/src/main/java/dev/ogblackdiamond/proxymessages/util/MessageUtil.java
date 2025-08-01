@@ -70,7 +70,7 @@ public class MessageUtil {
         return compileColoredMessage(coloredString, "");
     }
 
-    // removes and applies hex code coloring to the given string, returns a component object
+    // removes and applies hex code coloring to the given string, returns a custom MessageReturns object
     public MessageReturns compileColoredMessage(String coloredString, String type) {
 
         TextComponent.Builder finalMessage = Component.text();

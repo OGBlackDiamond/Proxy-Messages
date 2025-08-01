@@ -87,13 +87,16 @@ Under the `discord` section of your `config.yml`:
 **Note:** None of the configuration from this point forward will not matter if `enabled` is `false`
 
 * `bot-token`: A string that represents the bot token that the plugin will attempt to connect to. This is the same as the one you might use in the DiscordSRV plugin.
-* `channel-id`: The ID of the channel you want the proxy messages to be sent to.
+* `proxy-channel-id`: The ID of the channel you want the proxy's messages to be sent to.
+* `server-channel-ids`: A list of server names and a corresponding discord channel ID. Messages will be linked between each server and its corresponding channel.
 * `join-color`: Hex color code to be used for the Discord embed for join messages.
 * `leave-color`: Hex color code to be used for the Discord embed for leave messages.
 * `switch-color`: Hex color code to be used for the Discord embed for switch messages.
 * `text-configuration`: Options to customize the messages that get sent. Text options support markdown formatting.
   * `online-message`: The message to be sent when the proxy boots up.
   * `offline-message`: The message to be sent when the proxy shuts down.
+  * `player-message-prefix`: The prefix to a player's message going to discord - if global messages are enabled, it will use the global messaging prefix instead
+  * `discord-role-color`: When true, any messages from discord will color the name of the sender with the color of their role in discord.
   * `server-count`: Toggles whether a list of active servers will be printed when booting the proxy.
   * `display-icon`: Toggles whether or not to display a provided image on startup and shutdown.
 

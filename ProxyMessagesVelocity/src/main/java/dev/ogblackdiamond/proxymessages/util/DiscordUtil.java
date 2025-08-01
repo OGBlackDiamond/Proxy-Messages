@@ -60,6 +60,8 @@ public class DiscordUtil implements EventListener {
 
     private String playerMessagePrefix;
 
+    private boolean discordRoleColor;
+
     private boolean serverCount;
 
     private boolean displayIcon;
@@ -91,6 +93,8 @@ public class DiscordUtil implements EventListener {
         offlineMessage = textConfiguration.node("offline-message").getString();
 
         playerMessagePrefix = textConfiguration.node("player-message-prefix").getString();
+
+        discordRoleColor = textConfiguration.node("discord-role-color").getBoolean();
 
         serverCount = textConfiguration.node("server-count").getBoolean();
         
@@ -271,25 +275,86 @@ public class DiscordUtil implements EventListener {
     public void onEvent(GenericEvent event) {
         if (event.getClass() != MessageReceivedEvent.class) return;
         MessageReceivedEvent messageEvent = (MessageReceivedEvent) event;
-        
+
         if (messageEvent.getAuthor().isBot() || messageEvent.getAuthor().isSystem()) return;
 
+
         String channelID = messageEvent.getChannel().getId();
+
+        String prefix = proxyMessages.getGlobalMessages() ? proxyMessages.getGlobalMessagePrefix() : playerMessagePrefix;
+
+        if (discordRoleColor) {
+            prefix = colorPrefix(
+                prefix,
+                messageEvent.getMember().getColor()
+            );
+
+        }
+
+        // compile the message
+        MessageReturns message = messageUtil.compileFormattedMessage(
+            "",
+            messageEvent.getAuthor().getEffectiveName(),
+            "",
+            "Discord",
+            prefix + messageEvent.getMessage().getContentRaw()
+        );
+
+
+        // sends the message globally if it's in the global channel
+        if (proxyChannelID.equals(channelID)) {
+            proxyMessages.sendMessage(message);
+            return;
+        }
+
+        // I know this is stupid but I dont really care :)
+        // why are you reading my code?
+        int i = 0;
         for (TextChannel channel : serverNameIDPairs.values()) {
             if (channel.getId().equals(channelID)) {
-
-                MessageReturns message = messageUtil.compileFormattedMessage(
-                    "",
-                    messageEvent.getAuthor().getEffectiveName(),
-                    "",
-                    "Discord",
-                    proxyMessages.getGlobalMessagePrefix() + messageEvent.getMessage().getContentRaw()
-                );
-
-                proxyMessages.sendMessage(message);
+                Object serverNames[] = serverNameIDPairs.keySet().toArray();
+                proxyMessages.sendMessageToServer(message, serverNames[i].toString());
                 break;
             }
+            i++;
         }
+    }
+
+    private String colorPrefix(String prefix, Color color) {
+
+        String newPrefix = prefix;
+
+        int playerPlaceholderIndex = prefix.indexOf("{player}");
+        if (playerPlaceholderIndex == -1) return prefix;
+        int endPlayerPlaceholderIndex = prefix.indexOf("}", playerPlaceholderIndex);
+
+        int previousColorIndex = 0;
+        int previousColorIndexBuffer;
+        String stringBeforePlayerPlaceholder = prefix.substring(0, playerPlaceholderIndex);
+
+        do {
+            previousColorIndexBuffer = previousColorIndex;
+            previousColorIndex = stringBeforePlayerPlaceholder.indexOf("{#", previousColorIndexBuffer + 1);
+        } while (previousColorIndex != -1);
+        if (previousColorIndexBuffer == previousColorIndex) return prefix;
+
+        // encapsulate the {#FFFFFF} string in the prefix 
+        String previousColor = prefix.substring(previousColorIndexBuffer, previousColorIndexBuffer + 8);
+
+        String redHex = Integer.toHexString(color.getRed());
+        String greenHex = Integer.toHexString(color.getGreen());
+        String blueHex = Integer.toHexString(color.getBlue());
+
+        String newColor = "{#" + redHex + blueHex + greenHex + "}";
+
+        newPrefix = prefix.substring(0, playerPlaceholderIndex) 
+            + newColor 
+            + prefix.substring(playerPlaceholderIndex, endPlayerPlaceholderIndex + 1)
+            + previousColor
+            + prefix.substring(endPlayerPlaceholderIndex);
+
+
+        return newPrefix;
     }
 
     // checks to see if a string is a valid hex code
