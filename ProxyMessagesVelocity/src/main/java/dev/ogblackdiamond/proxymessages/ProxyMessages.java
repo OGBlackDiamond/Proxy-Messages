@@ -43,7 +43,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.5",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.6-alpha.1",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -272,7 +272,7 @@ public class ProxyMessages {
             false
         );
 
-        if (resourcePackEnabled && !resourcePackExcept.contains(event.getPlayer().getCurrentServer().get().getServerInfo().getName())) {
+        if (resourcePackEnabled && previousServerNull && !resourcePackExcept.contains(event.getPlayer().getCurrentServer().get().getServerInfo().getName())) {
             event.getPlayer().sendResourcePackOffer(resourcePack);
         }
 
@@ -323,6 +323,9 @@ public class ProxyMessages {
 
         discordUtil.sendMessage(message.getString(), serverName);
 
+        System.out.println("Player message: ");
+        System.out.println(message.getString());
+
         // handles global messages
         if (globalMessages && playersGlobalChat.get(event.getPlayer().getUniqueId())) sendMessage(message, event.getPlayer().getUniqueId(), true);
 
@@ -354,7 +357,12 @@ public class ProxyMessages {
             globalMessagePrefix + messageData
         );
 
-        sendMessage(message, playerUUID, false);
+        System.out.println("Backend Message:");
+        System.out.println(serverName);
+
+        // idk man
+        sendMessageToServer(message, serverName);
+        //sendMessage(message, playerUUID, true);
 
     }
 

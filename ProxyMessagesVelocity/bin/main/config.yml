@@ -59,16 +59,19 @@ network-resource-pack:
   except:
     - "modded"
 
-# options for discord SRV integration
+# options for discord integration
 discord:
-  # enables discord SRV mode
+  # enables discord features
   enabled: false 
+
+  # your bot token
   bot-token: "^token"
 
+  # the main channel where general proxy activity will be reported
   proxy-channel-id: "^channel-id"
 
-  # the channel IDs in order of how they appear in your velocity.toml
-  # the name of the server and it's corresponding discord channel id
+  # the servers (as listed in your velocity.toml) and their corresponding channel id
+  # each server will report its activity to it's specified channel
   server-channel-ids: 
     ^lobby: "lobby-channel-id"
     ^vanilla: "vanilla-channel-id"
@@ -87,9 +90,13 @@ discord:
     online-message: "## Proxy Online"
     offline-message: "## Proxy Offline"
 
-    # a prefix to player messages in discord
+    # a prefix to player messages in discord - these can be formatted like above
     # this only applies when global messaging is disabled
-    player-message-prefix: "<{player}>: "
+    player-message-prefix: "[{cur}] - <{player}>: "
+
+    # replaces the set color for a player's name with a user's role color
+    # when sending messages from discord to minecraft
+    discord-role-color: true
 
     # on proxy startup, lists available servers
     server-count: true

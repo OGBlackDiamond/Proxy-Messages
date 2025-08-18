@@ -45,6 +45,6 @@ tasks.jar {
 tasks.shadowJar {
     archiveBaseName.set("ProxyMessagesVelocity")
     archiveClassifier.set("")
-    archiveVersion.set("3.0.5")
+    archiveVersion.set("3.0.6-alpha.1")
     minimize()
 }
