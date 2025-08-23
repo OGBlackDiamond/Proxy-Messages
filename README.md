@@ -12,7 +12,7 @@ Join [my Discord!](https://discord.gg/C2PJNTN97u)
 * Multiple Message Variants: Create multiple potential messages for each event, allowing for variety and keeping the experience fresh for your players.
 * Custom Colors with HEX Support: Enhance your messages with custom colors using HEX codes to match your server's branding or aesthetic.
 * Abitility to instate network-wide resource packs.
-* Integration with DiscordSRV to keep your sever network connected over discord! 
+* Integration with Discord to keep your sever network connected over discord! 
 
 ### Configuration Overview:
 All configurations are managed on the proxy side, meaning there’s no need to synchronize settings across individual backend servers. Simply edit the `config.yml` file located in `plugins/proxymessages/` on your proxy server to get started.
@@ -21,7 +21,7 @@ All configurations are managed on the proxy side, meaning there’s no need to s
 ProxyMessages can work standalone on a velocity server. However, due to limitations in the velocity API, it cannot edit or change the vanilla messages that normally appear on servers. These include the vanilla join and leave messages, as well as vanilla chat messages on the server that the player is connected to. If you'd like remove the vanilla join and leave messages, and format chat messages, please use the provided paper plugin on all of your backend servers. Once the paper plugin is installed, the aforementioned features will automatically start working. No extra configuration is needed.
 
 #### **COLOR**:
-In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
+In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code **except player names** will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
 
 #### **STYLING**
 In all message options, you can use Kyori Adventure TextDecoration options to further style your join options. Options include:
@@ -35,6 +35,7 @@ Two sets of these tags will "open" and "close" their syle. For example, you can 
 
 
 ### Key Configuration Options:
+* `default-player-color`: The default color for players who havent set a color for their name.
 * `global-network-join`: Toggle the join message for all users when a player joins the network.
 * `global-network-leave`: Toggle the leave message for all users when a player leaves the network.
 * `global-network-switch`: Toggle the server switch message for all users when a player moves between servers.
@@ -43,6 +44,11 @@ Two sets of these tags will "open" and "close" their syle. For example, you can 
 * `leave-message-options`: Define a list of potential leave messages. Use {player} as a placeholder for the player’s username.
 * `switch-message-options`: Define a list of potential switch messages. Use {player}, {prev} for the previous server, and {cur} for the current server as placeholders.
 * `global-message-prefix`: The prefix to global messages for other servers. Use {player} for the player sending the message, and {cur} as the server they're sending the message from.
+
+### Player Specific Name Coloring:
+Players can customize the color of their name individually. They simply need to execute the command `set-color #xxxxxx` where `#xxxxxx` is a standard hex code.
+
+Player's names can also be changed by another player (I'm planning on making this an operator only feature soon...) with the command `set-color #xxxxxx playerName`
 
 ### Config Reloading
 The configuration for this plugin can reload on the fly!

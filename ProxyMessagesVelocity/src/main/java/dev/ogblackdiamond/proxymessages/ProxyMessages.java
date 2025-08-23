@@ -27,6 +27,7 @@ import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
 import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 import dev.ogblackdiamond.proxymessages.commands.GlobalMessagesCommand;
 import dev.ogblackdiamond.proxymessages.commands.Reload;
+import dev.ogblackdiamond.proxymessages.commands.SetColor;
 import net.kyori.adventure.text.Component;
 import jakarta.xml.bind.DatatypeConverter;
 
@@ -35,15 +36,17 @@ import java.util.List;
 import java.util.UUID;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.0.6-alpha.1",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.1.0",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -54,6 +57,9 @@ public class ProxyMessages {
 
     @DataDirectory
     private final Path dataDirectory;
+
+    private Path database;
+    private List<String> colorMap;
 
     private MessageUtil messageUtil;
     private DiscordUtil discordUtil;
@@ -106,7 +112,7 @@ public class ProxyMessages {
         this.metricsFactory = metricsFactory;
         this.dataDirectory = dataDirectory;
 
-        messageUtil = new MessageUtil();
+        messageUtil = new MessageUtil(this);
 
         playersGlobalChat = new HashMap<UUID, Boolean>();
 
@@ -119,6 +125,22 @@ public class ProxyMessages {
         server.getChannelRegistrar().register(IDENTIFIER);
 
         initialize(0);
+
+    }
+
+    @Subscribe void onProxyShutdown(ProxyShutdownEvent event) throws IOException {
+
+        OutputStream out = Files.newOutputStream(database);
+
+        for (String string : colorMap) {
+            out.write((string + "\n").getBytes());
+        }
+
+        out.close();
+
+
+        if (discordUtil != null)
+            discordUtil.proxyOffline();
 
     }
 
@@ -137,9 +159,22 @@ public class ProxyMessages {
             }
         }
         
+        boolean newFile = false;
+        database = dataDirectory.resolve("database.txt");
+        if (Files.notExists(database)) {
+            newFile = true;
+            try (InputStream dbstream = this.getClass().getClassLoader().getResourceAsStream("database.txt")) {
+                Files.copy(dbstream, database);
+            }
+        }
+
+        colorMap = Files.readAllLines(database);
 
         final YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(config).build();
         final CommentedConfigurationNode root = loader.load();
+
+        // adds the default color to the color map
+        if (newFile) colorMap.add(0, "default " + root.node("default-player-color").getString());
 
         globalJoin = root.node("global-network-join").getBoolean();
 
@@ -209,7 +244,14 @@ public class ProxyMessages {
             }
         );
 
+        CommandMeta setColorCommandMeta = commandManager.metaBuilder("set-color")
+            .aliases("setColor")
+            .build();
+
+        SimpleCommand setColorCommand = new SetColor(this);
+
         commandManager.register(reloadCommandMeta, reloadCommand);
+        commandManager.register(setColorCommandMeta, setColorCommand);
 
         // optional global messages
         if (globalMessages) {
@@ -230,12 +272,6 @@ public class ProxyMessages {
 
         }
 
-    }
-
-    @Subscribe
-    public void onProxyShutdown(ProxyShutdownEvent event) {
-        if (discordUtil != null)
-            discordUtil.proxyOffline();
     }
 
     /**
@@ -323,9 +359,6 @@ public class ProxyMessages {
 
         discordUtil.sendMessage(message.getString(), serverName);
 
-        System.out.println("Player message: ");
-        System.out.println(message.getString());
-
         // handles global messages
         if (globalMessages && playersGlobalChat.get(event.getPlayer().getUniqueId())) sendMessage(message, event.getPlayer().getUniqueId(), true);
 
@@ -357,10 +390,6 @@ public class ProxyMessages {
             globalMessagePrefix + messageData
         );
 
-        System.out.println("Backend Message:");
-        System.out.println(serverName);
-
-        // idk man
         sendMessageToServer(message, serverName);
         //sendMessage(message, playerUUID, true);
 
@@ -392,6 +421,29 @@ public class ProxyMessages {
 
     public MessageUtil getMessageUtil() {
         return messageUtil;
+    }
+
+    public List<String> getColorMap() {
+        return colorMap;
+    }
+
+    public String getColor(String playerName) {
+        for (String color : colorMap) {
+            if (color.substring(0, color.indexOf(" ")).equals(playerName)){
+                return color.substring(color.indexOf(" ") + 1);
+            } 
+        }
+        return getColor("default");
+    }
+
+    public void appendColorMap(String colorPair) {
+        for (int i = 0; i < colorMap.size(); i++) {
+            if (colorMap.get(i).substring(0, colorMap.get(i).indexOf(" "))
+                .equals(colorPair.substring(0, colorPair.indexOf(" ")))) {
+                colorMap.remove(i);
+            }
+        }
+        colorMap.add(colorPair);
     }
 
     public String getGlobalMessagePrefix() {

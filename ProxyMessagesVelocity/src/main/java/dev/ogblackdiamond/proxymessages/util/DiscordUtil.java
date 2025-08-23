@@ -1,18 +1,14 @@
 package dev.ogblackdiamond.proxymessages.util;
 
 import net.dv8tion.jda.api.hooks.EventListener;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.Color;
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
+import java.io.File; import java.util.HashMap;
 import java.util.Map; import java.util.Set;
 import java.util.UUID;
-import java.util.regex.*;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -20,7 +16,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.ProxyMessages;
-import dev.ogblackdiamond.proxymessages.util.MessageUtil;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -130,17 +125,17 @@ public class DiscordUtil implements EventListener {
 
 
         // load and validate colors from config
-        if(!isValidHex(joinColorStr)){
+        if(!HexUtil.isValidHex(joinColorStr)){
             joinColor = Color.decode("#00FF00");
         }else{
             joinColor = Color.decode(joinColorStr);
         }
-        if(!isValidHex(leaveColorStr)){
+        if(!HexUtil.isValidHex(leaveColorStr)){
             leaveColor = Color.decode("#FF0000");
         }else{
             leaveColor = Color.decode(leaveColorStr);
         }
-        if(!isValidHex(switchColorStr)){
+        if(!HexUtil.isValidHex(switchColorStr)){
             switchColor = Color.decode("#FFFF00");
         }else{
             switchColor = Color.decode(switchColorStr);
@@ -357,17 +352,4 @@ public class DiscordUtil implements EventListener {
         return newPrefix;
     }
 
-    // checks to see if a string is a valid hex code
-    public boolean isValidHex(String str)
-    {
-        boolean ret = false;
-
-        if(str != null) {
-            String hexRegex = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
-            Pattern hexPattern = Pattern.compile(hexRegex);
-            Matcher hexMatcher = hexPattern.matcher(str);
-            ret = hexMatcher.matches();
-        }
-        return ret;
-    }
 } 

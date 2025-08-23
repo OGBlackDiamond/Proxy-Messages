@@ -1,5 +1,6 @@
 package dev.ogblackdiamond.proxymessages.util;
 
+import dev.ogblackdiamond.proxymessages.ProxyMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -7,6 +8,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 public class MessageUtil {
+
+    private ProxyMessages proxyMessages;
 
     private final String playerStr = "{player}";
     private final int playerNameLength = playerStr.length(); 
@@ -28,13 +31,26 @@ public class MessageUtil {
     private final String obfuscateStr = "{obfuscate}";
     private final int obfuscatedLength = obfuscateStr.length();
 
+    public MessageUtil(ProxyMessages proxyMessages) {
+        this.proxyMessages = proxyMessages;
+    }
 
     // compiles the message, interpolating correct strings when needed.
-    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String chosenMessage) {
+    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString) {
 
         TextComponent.Builder finalMessage = Component.text();
 
+        String chosenMessage = ogString;
         String finalString = "";
+
+
+        int playerStrLocation = ogString.indexOf(playerStr);
+        if (playerStrLocation != -1) {
+            chosenMessage = 
+                ogString.substring(0, playerStrLocation) 
+                + "{" + proxyMessages.getColor(playerName) + "}"
+                + ogString.substring(playerStrLocation);
+        }
 
         int messageLength = chosenMessage.length();
 

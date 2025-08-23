@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     implementation("org.apache.commons:commons-text")
-    //implementation(project(":utilities"))
+
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 
@@ -45,6 +45,6 @@ tasks.jar {
 tasks.shadowJar {
     archiveBaseName.set("ProxyMessagesVelocity")
     archiveClassifier.set("")
-    archiveVersion.set("3.0.6-alpha.1")
+    archiveVersion.set("3.1.0")
     minimize()
 }

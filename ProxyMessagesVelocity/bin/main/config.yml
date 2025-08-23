@@ -14,6 +14,9 @@ global-messages: true
 # for all message options, you can insert a hex code (example: {#ff0066}). Characters after this hex code will turn the color of the code. Multiple hex codes can be used to make a string multicolored.
 # you can also insert tags like {bold} and {italic} to style your messages. Please refer to the documentation for this plugin for more information.
 
+# the player name will be highlighted this color if they have not set a custom one
+default-player-color: "#f3f3f3"
+
 # options from this list will be randomly chosen to be displayed when a player joins the network
 # {player} will be replaced by the player name
 join-message-options:
