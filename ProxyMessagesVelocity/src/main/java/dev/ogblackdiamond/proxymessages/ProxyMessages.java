@@ -66,6 +66,8 @@ public class ProxyMessages {
 
     private boolean discordEnabled;
 
+    private boolean discordChatSync;
+
     private boolean resourcePackEnabled;
     
     private boolean resourcePackRequired;
@@ -194,6 +196,8 @@ public class ProxyMessages {
         discordEnabled = discordOptions.node("enabled").getBoolean();
             
         if (discordEnabled) {
+
+            discordChatSync = discordOptions.node("text-configuration", "player-chat-sync", "enabled").getBoolean();
 
             discordUtil = new DiscordUtil(
                 this,
@@ -357,7 +361,7 @@ public class ProxyMessages {
             (globalMessages ? globalMessagePrefix : discordUtil.getPlayerMessagePrefix()) + event.getMessage()
         );
 
-        discordUtil.sendMessage(message.getString(), serverName);
+        if (discordEnabled && discordChatSync) discordUtil.sendMessage(message.getString(), serverName);
 
         // handles global messages
         if (globalMessages && playersGlobalChat.get(event.getPlayer().getUniqueId())) sendMessage(message, event.getPlayer().getUniqueId(), true);
@@ -391,7 +395,6 @@ public class ProxyMessages {
         );
 
         sendMessageToServer(message, serverName);
-        //sendMessage(message, playerUUID, true);
 
     }
 

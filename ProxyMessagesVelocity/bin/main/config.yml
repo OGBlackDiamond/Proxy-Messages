@@ -14,8 +14,8 @@ global-messages: true
 # for all message options, you can insert a hex code (example: {#ff0066}). Characters after this hex code will turn the color of the code. Multiple hex codes can be used to make a string multicolored.
 # you can also insert tags like {bold} and {italic} to style your messages. Please refer to the documentation for this plugin for more information.
 
-# the player name will be highlighted this color if they have not set a custom one
-default-player-color: "#f3f3f3"
+# the default color to be used for a player's name in messages when they have not set one
+default-player-color: "#fcfcfc"
 
 # options from this list will be randomly chosen to be displayed when a player joins the network
 # {player} will be replaced by the player name
@@ -23,8 +23,7 @@ join-message-options:
   - "{player} joined the network"
 
 # options from this list will be randomly chosen to be displayed when a player leaves the network
-# {player} will be replaced by the player name
-leave-message-options:
+# {player} will be replaced by the player name leave-message-options:
   - "{player} left the network"
 
 # options from this list will be randomly chosen to be displayed when a player changes between two servers on the network 
@@ -73,13 +72,6 @@ discord:
   # the main channel where general proxy activity will be reported
   proxy-channel-id: "^channel-id"
 
-  # the servers (as listed in your velocity.toml) and their corresponding channel id
-  # each server will report its activity to it's specified channel
-  server-channel-ids: 
-    ^lobby: "lobby-channel-id"
-    ^vanilla: "vanilla-channel-id"
-
-
   # Color of the discord embed for join messages
   join-color: "#00ff00"
   # Color of the discord embed for leave messages
@@ -93,9 +85,24 @@ discord:
     online-message: "## Proxy Online"
     offline-message: "## Proxy Offline"
 
-    # a prefix to player messages in discord - these can be formatted like above
-    # this only applies when global messaging is disabled
-    player-message-prefix: "[{cur}] - <{player}>: "
+
+    # whether or not to sync player chat with discord
+    player-chat-sync:
+
+      # enable the feature
+      enabled: false
+
+      # a prefix to player messages in discord - these can be formatted like above
+      # this only applies when global messaging is disabled
+      player-message-prefix: "[{cur}] - <{player}>: "
+
+
+      # the servers (as listed in your velocity.toml) and their corresponding channel id
+      # each server will report its activity to it's specified channel
+      server-channel-ids: 
+        ^lobby: "lobby-channel-id"
+        ^vanilla: "vanilla-channel-id"
+
 
     # replaces the set color for a player's name with a user's role color
     # when sending messages from discord to minecraft

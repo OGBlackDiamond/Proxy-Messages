@@ -48,6 +48,8 @@ public class DiscordUtil implements EventListener {
 
     CommentedConfigurationNode serverChannelPairsNode;
     CommentedConfigurationNode textConfiguration;
+
+    CommentedConfigurationNode playerChatSync;
     
     private String onlineMessage;
 
@@ -76,7 +78,6 @@ public class DiscordUtil implements EventListener {
 
         serverNameIDPairs = new HashMap<String, TextChannel>();
 
-        serverChannelPairsNode = configNode.node("server-channel-ids");
 
         Map<Object, CommentedConfigurationNode> serverChannels = serverChannelPairsNode.childrenMap();
         Set<Object> servers = serverChannels.keySet();
@@ -87,13 +88,17 @@ public class DiscordUtil implements EventListener {
 
         offlineMessage = textConfiguration.node("offline-message").getString();
 
-        playerMessagePrefix = textConfiguration.node("player-message-prefix").getString();
-
         discordRoleColor = textConfiguration.node("discord-role-color").getBoolean();
 
         serverCount = textConfiguration.node("server-count").getBoolean();
         
         displayIcon = textConfiguration.node("display-icon").getBoolean();
+
+        playerChatSync = textConfiguration.node("player-chat-sync");
+
+        playerMessagePrefix = playerChatSync.node("player-message-prefix").getString();
+
+        serverChannelPairsNode = playerChatSync.node("server-channel-ids");
 
         String joinColorStr = configNode.node("join-message-options").getString();
         String leaveColorStr = configNode.node("leave-message-options").getString();
