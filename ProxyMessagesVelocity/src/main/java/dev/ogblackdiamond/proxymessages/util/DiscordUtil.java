@@ -50,6 +50,8 @@ public class DiscordUtil implements EventListener {
     CommentedConfigurationNode textConfiguration;
 
     CommentedConfigurationNode playerChatSync;
+
+    private boolean playerChatSyncEnabled;
     
     private String onlineMessage;
 
@@ -91,6 +93,8 @@ public class DiscordUtil implements EventListener {
         displayIcon = textConfiguration.node("display-icon").getBoolean();
 
         playerChatSync = textConfiguration.node("player-chat-sync");
+
+        playerChatSyncEnabled = playerChatSync.node("enabled").getBoolean();
 
         playerMessagePrefix = playerChatSync.node("player-message-prefix").getString();
 
@@ -277,7 +281,7 @@ public class DiscordUtil implements EventListener {
 
         if (messageEvent.getAuthor().isBot() || messageEvent.getAuthor().isSystem()) return;
 
-        if (!playerChatSync) return;
+        if (!playerChatSyncEnabled) return;
 
 
         String channelID = messageEvent.getChannel().getId();
