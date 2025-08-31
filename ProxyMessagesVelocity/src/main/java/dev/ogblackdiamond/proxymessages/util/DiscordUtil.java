@@ -125,8 +125,7 @@ public class DiscordUtil implements EventListener {
 
         if (botToken.substring(0, 1).equals("^") || proxyChannelID.substring(0, 1).equals("^") || !validChannelIDs) {
             status = "Invalid channel or token provided!";
-            return;
-        }
+            return; }
 
 
         // load and validate colors from config
@@ -277,6 +276,8 @@ public class DiscordUtil implements EventListener {
         MessageReceivedEvent messageEvent = (MessageReceivedEvent) event;
 
         if (messageEvent.getAuthor().isBot() || messageEvent.getAuthor().isSystem()) return;
+
+        if (!playerChatSync) return;
 
 
         String channelID = messageEvent.getChannel().getId();
