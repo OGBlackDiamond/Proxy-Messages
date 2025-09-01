@@ -1,3 +1,5 @@
+/*
+
 package dev.ogblackdiamond.proxymessages.util;
 
 import org.spongepowered.configurate.objectmapping.*;
@@ -36,3 +38,4 @@ public class ConfigUtil{
     public boolean globalMessageDefault;
 
 }
+*/
