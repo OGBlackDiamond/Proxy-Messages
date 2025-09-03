@@ -86,6 +86,11 @@ discord:
     online-message: "## Proxy Online"
     offline-message: "## Proxy Offline"
 
+    # on proxy startup, lists available servers
+    server-count: true
+
+    # on startup and shutdown, show an image if you provided one
+    display-icon: false
 
     # whether or not to sync player chat with discord
     player-chat-sync:
@@ -97,6 +102,9 @@ discord:
       # this only applies when global messaging is disabled
       player-message-prefix: "[{cur}] - <{player}>: "
 
+      # replaces the set color for a player's name with a user's role color
+      # when sending messages from discord to minecraft
+      discord-role-color: true
 
       # the servers (as listed in your velocity.toml) and their corresponding channel id
       # each server will report its activity to it's specified channel
@@ -104,13 +112,3 @@ discord:
         ^lobby: "lobby-channel-id"
         ^vanilla: "vanilla-channel-id"
 
-
-    # replaces the set color for a player's name with a user's role color
-    # when sending messages from discord to minecraft
-    discord-role-color: true
-
-    # on proxy startup, lists available servers
-    server-count: true
-
-    # on startup and shutdown, show an image if you provided one
-    display-icon: false

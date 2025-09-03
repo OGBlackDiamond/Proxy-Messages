@@ -1,14 +1,18 @@
 package dev.ogblackdiamond.proxymessages.util;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Processor;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
-public class ConfigUtil{
+public class ConfigUtil {
 
     @Setting(value="global-network-join")
     @Comment(value="enables a network-wide join message for when a player joins the network")  
@@ -55,7 +59,7 @@ public class ConfigUtil{
 
     @Setting(value="network-resource-pack")
     @Comment(value="options for a network-wide resource pack")
-    private CommentedConfigurationNode networkResourcePackNode;
+    private ConfigurationNode networkResourcePackNode;
 
     @Setting(value="network-resource-pack.enabled")
     @Comment(value="whether or not to use a resource pack")
@@ -86,7 +90,7 @@ public class ConfigUtil{
 
     @Setting(value="discord")
     @Comment(value="options for discord integration")
-    private CommentedConfigurationNode discordNode;
+    private ConfigurationNode discordNode;
 
     @Setting(value="discord.enabled")
     @Comment(value="enables discord features")
@@ -114,7 +118,7 @@ public class ConfigUtil{
     //////////// - text configuration subnode tree
     @Setting(value="discord.text-configuration")
     @Comment(value="all text options support markdown formatting\nthese messages DO NOT support hex codes like above")
-    private CommentedConfigurationNode discordTextConfigurationNode;
+    private ConfigurationNode discordTextConfigurationNode;
 
     @Setting(value="discord.text-configuration.online-message")
     @Comment(value="the message to be displayed when the proxy comes online")
@@ -124,10 +128,18 @@ public class ConfigUtil{
     @Comment(value="the message to be displayed when the proxy goes offline")
     public String discordOfflineMessage = "## Proxy Offline";
 
+    @Setting(value="discord.text-configuration.server-count")
+    @Comment(value="on proxy startup, lists available servers")
+    public boolean discordServerCount = true;
+
+    @Setting(value="discord.text-configuration.display-icon")
+    @Comment(value="on startup and shutdown, include an image in the embed")
+    public boolean discordDisplayIcon = false;
+
 
     @Setting(value="discord.text-configuration.player-chat-sync")
     @Comment(value="whether or not to sync player chat with discord")
-    private CommentedConfigurationNode discordPlayerChatSyncNode;
+    private ConfigurationNode discordPlayerChatSyncNode;
 
     @Setting(value="discord.text-configuration.player-chat-sync.enabled")
     @Comment(value="enable discord chat sync")
@@ -139,7 +151,7 @@ public class ConfigUtil{
 
     @Setting(value="discord.text-configuration.player-chat-sync.server-channel-ids")
     @Comment(value="the servers (as listed in your velocity.toml) and their corresponding channel id\neach server will report its activity to it's specified channel")
-    public CommentedConfigurationNode discordPlayerChatSyncChannelIDs;
+    public ConfigurationNode discordPlayerChatSyncChannelIDs;
 
     @Setting(value="discord.text-configuration.player-chat-sync.server-channel-ids.^lobby")
     public String exampleValue = "lobby-channel-id";
@@ -147,6 +159,11 @@ public class ConfigUtil{
     @Setting(value="discord.text-configuration.player-chat-sync.server-channel-ids.^vanilla")
     public String exampleValue2 = "vanilla-channel-id";
 
-    // TODO: make custom node loader for the server-channel-ids cause they're static
-    // TODO: finish/move the stuff below the sync stuff
+    @Setting(value="test")
+    public String test = "this is a test maaan";
+
+    // load in the real values, we unfortunately can't do this automatically
+    //public Map<Object, ? extends ConfigurationNode> discordServerChannels = discordPlayerChatSyncChannelIDs.childrenMap();
+    //public Set<Object> discordServerIDs = discordServerChannels.keySet();
 }
+

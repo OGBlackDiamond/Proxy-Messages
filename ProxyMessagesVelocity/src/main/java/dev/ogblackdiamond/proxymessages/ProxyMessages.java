@@ -2,6 +2,7 @@ package dev.ogblackdiamond.proxymessages;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
@@ -24,6 +25,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
 import dev.ogblackdiamond.proxymessages.util.Metrics;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
+import dev.ogblackdiamond.proxymessages.util.ConfigUtil;
 import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 import dev.ogblackdiamond.proxymessages.commands.GlobalMessagesCommand;
 import dev.ogblackdiamond.proxymessages.commands.Reload;
@@ -42,11 +44,13 @@ import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.objectmapping.meta.Processor;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.1.11",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.5.0",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -172,8 +176,18 @@ public class ProxyMessages {
 
         colorMap = Files.readAllLines(database);
 
-        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(config).build();
+        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+            .defaultOptions(ConfigurationOptions.defaults())
+            .path(config)
+            .build();
+
         final CommentedConfigurationNode root = loader.load();
+
+        ConfigUtil configUtil = root.get(ConfigUtil.class);
+
+        System.out.println(configUtil.test);
+
+        loader.save(root);
 
         // adds the default color to the color map
         if (newFile) colorMap.add(0, "default " + root.node("default-player-color").getString());
