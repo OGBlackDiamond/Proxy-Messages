@@ -39,14 +39,19 @@ import java.util.UUID;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Processor;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.*;
 /**
  * Main class for ProxyMessages.
  */
@@ -161,7 +166,7 @@ public class ProxyMessages {
         final Path config = dataDirectory.resolve("config.yml");
         if (Files.notExists(config)) {
             try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("config.yml")) {
-                Files.copy(stream, config);
+                Files.createFile(config);
             }
         }
         
@@ -181,11 +186,27 @@ public class ProxyMessages {
             .path(config)
             .build();
 
-        final CommentedConfigurationNode root = loader.load();
+
+        final CommentedConfigurationNode root = loader.load(
+            ConfigurationOptions.defaults()
+                .serializers(
+                    TypeSerializerCollection.builder()
+                    .registerAll(ConfigurationOptions.defaults().serializers())
+                    .registerAnnotatedObjects(
+                        ObjectMapper.factoryBuilder()
+                        .addProcessor(
+                            Comment.class,
+                            Processor.comments()
+                        )
+                        .build()
+                    )
+                    .build()
+                )
+        );
 
         ConfigUtil configUtil = root.get(ConfigUtil.class);
 
-        System.out.println(configUtil.test);
+        System.out.println(root.raw());
 
         loader.save(root);
 

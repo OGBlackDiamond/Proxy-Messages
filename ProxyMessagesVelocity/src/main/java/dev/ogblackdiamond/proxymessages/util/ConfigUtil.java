@@ -14,8 +14,9 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public class ConfigUtil {
 
+
     @Setting(value="global-network-join")
-    @Comment(value="enables a network-wide join message for when a player joins the network")  
+    @Comment(value="enables a network-wide join message for when a player joins the network", override=true)  
     public boolean globalNetworkJoin = true;
 
     @Setting(value="global-network-leave")
