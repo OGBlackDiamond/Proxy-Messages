@@ -47,11 +47,12 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Processor;
+import org.spongepowered.configurate.objectmapping.meta.PostProcessor;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
-import org.spongepowered.configurate.objectmapping.*;
 /**
  * Main class for ProxyMessages.
  */
@@ -186,12 +187,10 @@ public class ProxyMessages {
             .path(config)
             .build();
 
-
         final CommentedConfigurationNode root = loader.load(
             ConfigurationOptions.defaults()
                 .serializers(
                     TypeSerializerCollection.builder()
-                    .registerAll(ConfigurationOptions.defaults().serializers())
                     .registerAnnotatedObjects(
                         ObjectMapper.factoryBuilder()
                         .addProcessor(
@@ -200,6 +199,7 @@ public class ProxyMessages {
                         )
                         .build()
                     )
+                    .registerAll(ConfigurationOptions.defaults().serializers())
                     .build()
                 )
         );

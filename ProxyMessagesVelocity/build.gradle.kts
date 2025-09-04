@@ -18,6 +18,8 @@ dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 
+    implementation("org.spongepowered:configurate-yaml:4.2.0")
+
     implementation("net.dv8tion:JDA:5.6.1")
 
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
