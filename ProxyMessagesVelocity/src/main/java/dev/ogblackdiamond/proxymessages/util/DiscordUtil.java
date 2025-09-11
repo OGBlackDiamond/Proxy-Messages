@@ -29,8 +29,8 @@ public class DiscordUtil implements EventListener {
     private JDA jda;
 
     private ProxyMessages proxyMessages;
-
     private MessageUtil messageUtil;
+    private ConfigUtil configUtil;
 
     private TextChannel messageChannel;
 
@@ -40,84 +40,63 @@ public class DiscordUtil implements EventListener {
 
     private boolean imageExists;
 
-    private String botToken;
-
-    private String proxyChannelID;
-
     private HashMap<String, TextChannel> serverNameIDPairs;
-
-    CommentedConfigurationNode serverChannelPairsNode;
-    CommentedConfigurationNode textConfiguration;
-
-    CommentedConfigurationNode playerChatSync;
-
-    private boolean playerChatSyncEnabled;
-    
-    private String onlineMessage;
-
-    private String offlineMessage;
-
-    private String playerMessagePrefix;
-
-    private boolean discordRoleColor;
-
-    private boolean serverCount;
-
-    private boolean displayIcon;
 
     private Color joinColor;
     private Color leaveColor;
     private Color switchColor;
 
 
-    public DiscordUtil(ProxyMessages proxyMessages, CommentedConfigurationNode configNode) throws SerializationException {
+    public DiscordUtil(ProxyMessages proxyMessages, MessageUtil messageUtil, ConfigUtil configUtil) throws SerializationException {
 
-        // load all discord values from config
-        
-        botToken =  configNode.node("bot-token").getString();
-
-        proxyChannelID = configNode.node("proxy-channel-id").getString();
-
-        serverNameIDPairs = new HashMap<String, TextChannel>();
-
-        textConfiguration = configNode.node("text-configuration");
-
-        onlineMessage = textConfiguration.node("online-message").getString();
-
-        offlineMessage = textConfiguration.node("offline-message").getString();
-
-        discordRoleColor = textConfiguration.node("discord-role-color").getBoolean();
-
-        serverCount = textConfiguration.node("server-count").getBoolean();
-        
-        displayIcon = textConfiguration.node("display-icon").getBoolean();
-
-        playerChatSync = textConfiguration.node("player-chat-sync");
-
-        playerChatSyncEnabled = playerChatSync.node("enabled").getBoolean();
-
-        playerMessagePrefix = playerChatSync.node("player-message-prefix").getString();
-
-        serverChannelPairsNode = playerChatSync.node("server-channel-ids");
-
-        Map<Object, CommentedConfigurationNode> serverChannels = serverChannelPairsNode.childrenMap();
-        Set<Object> servers = serverChannels.keySet();
-
-
-        String joinColorStr = configNode.node("join-message-options").getString();
-        String leaveColorStr = configNode.node("leave-message-options").getString();
-        String switchColorStr = configNode.node("switch-message-options").getString();
+        this.proxyMessages = proxyMessages;
+        this.messageUtil = messageUtil;
+        this.configUtil = configUtil;
 
         File imageFile = new File("plugins/proxymessages/icon.jpg");
 
-        if (imageFile != null && displayIcon) {
+        if (imageFile != null && configUtil.discordTextConfig.discordDisplayIcon) {
             file = FileUpload.fromData(imageFile, "icon.jpg");
             imageExists = true;
         } else {
             imageExists = false;
         }
 
+       
+        // load and validate colors from config
+        if(!HexUtil.isValidHex(configUtil.discordConfig.discordJoinColor)){
+            joinColor = Color.decode("#00FF00");
+        }else{
+            joinColor = Color.decode(configUtil.discordConfig.discordJoinColor);
+        }
+        if(!HexUtil.isValidHex(configUtil.discordConfig.discordLeaveColor)){
+            leaveColor = Color.decode("#FF0000");
+        }else{
+            leaveColor = Color.decode(configUtil.discordConfig.discordLeaveColor);
+        }
+        if(!HexUtil.isValidHex(configUtil.discordConfig.discordSwitchColor)){
+            switchColor = Color.decode("#FFFF00");
+        }else{
+            switchColor = Color.decode(configUtil.discordConfig.discordSwitchColor);
+        }
+
+
+        // creates the jda wrapper
+        jda = JDABuilder.createDefault(configUtil.discordConfig.discordBotToken)
+            .addEventListeners(this)
+            .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+            .build();
         
+        try {
+            jda.awaitReady();
+        } catch (InterruptedException e) { }
+
+        
+        // a null check should be be performed in another class after construction
+        messageChannel = jda.getChannelById(TextChannel.class, configUtil.discordConfig.discordProxyChannelID);
+
+        serverNameIDPairs = new HashMap<String, TextChannel>();
+ 
         boolean validChannelIDs = true;
 
         for (String id : serverNameIDPairs.keySet()) {
@@ -127,49 +106,15 @@ public class DiscordUtil implements EventListener {
             }
         }
 
-        if (botToken.substring(0, 1).equals("^") || proxyChannelID.substring(0, 1).equals("^") || !validChannelIDs) {
+        if (configUtil.discordConfig.discordBotToken.substring(0, 1).equals("^") || configUtil.discordConfig.discordProxyChannelID.substring(0, 1).equals("^") || !validChannelIDs) {
             status = "Invalid channel or token provided!";
-            return; }
-
-
-        // load and validate colors from config
-        if(!HexUtil.isValidHex(joinColorStr)){
-            joinColor = Color.decode("#00FF00");
-        }else{
-            joinColor = Color.decode(joinColorStr);
-        }
-        if(!HexUtil.isValidHex(leaveColorStr)){
-            leaveColor = Color.decode("#FF0000");
-        }else{
-            leaveColor = Color.decode(leaveColorStr);
-        }
-        if(!HexUtil.isValidHex(switchColorStr)){
-            switchColor = Color.decode("#FFFF00");
-        }else{
-            switchColor = Color.decode(switchColorStr);
+            return;
         }
 
-
-        // creates the jda wrapper
-        jda = JDABuilder.createDefault(botToken)
-            .addEventListeners(this)
-            .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-            .build();
-        
-        try {
-            jda.awaitReady();
-        } catch (InterruptedException e) { }
-
-        this.proxyMessages = proxyMessages;
-        messageUtil = proxyMessages.getMessageUtil();
-        
-        // a null check should be be performed in another class after construction
-        messageChannel = jda.getChannelById(TextChannel.class, proxyChannelID);
-
-        for (Object object : servers) {
+        for (String server : configUtil.discordChatSyncConfig.discordServerIDs) {
             serverNameIDPairs.put(
-                object.toString(),
-                jda.getChannelById(TextChannel.class, serverChannels.get(object).getString())
+                server,
+                jda.getChannelById(TextChannel.class, configUtil.discordChatSyncConfig.discordPlayerChatSyncChannelIDs.get(server))
             );
         }
 
@@ -199,16 +144,16 @@ public class DiscordUtil implements EventListener {
         }
 
         EmbedBuilder builder = new EmbedBuilder()
-            .setDescription(onlineMessage)
+            .setDescription(configUtil.discordTextConfig.discordOnlineMessage)
             .setColor(new Color(20, 200, 20));
 
-        if (imageExists && displayIcon) builder.setImage("attachment://icon.jpg");
+        if (imageExists && configUtil.discordTextConfig.discordDisplayIcon) builder.setImage("attachment://icon.jpg");
 
-        if (serverCount) builder.addField("Current Servers:", serversList, false);
+        if (configUtil.discordTextConfig.discordServerCount) builder.addField("Current Servers:", serversList, false);
 
         MessageCreateAction msg = messageChannel.sendMessageEmbeds(builder.build());
 
-        if (imageExists && displayIcon) msg.addFiles(file);
+        if (imageExists && configUtil.discordTextConfig.discordDisplayIcon) msg.addFiles(file);
 
         msg.complete();
 
@@ -218,14 +163,14 @@ public class DiscordUtil implements EventListener {
     public void proxyOffline() {
 
         EmbedBuilder builder = new EmbedBuilder()
-            .setDescription(offlineMessage)
+            .setDescription(configUtil.discordTextConfig.discordOfflineMessage)
             .setColor(new Color(200, 20, 20));
 
-        if (imageExists && displayIcon) builder.setImage("attachment://icon.jpg");
+        if (imageExists && configUtil.discordTextConfig.discordDisplayIcon) builder.setImage("attachment://icon.jpg");
 
         MessageCreateAction msg = messageChannel.sendMessageEmbeds(builder.build());
 
-        if (imageExists && displayIcon) msg.addFiles(file);
+        if (imageExists && configUtil.discordTextConfig.discordDisplayIcon) msg.addFiles(file);
         
         msg.complete();
 
@@ -286,7 +231,7 @@ public class DiscordUtil implements EventListener {
 
         String channelID = messageEvent.getChannel().getId();
 
-        String prefix = proxyMessages.getGlobalMessages() ? proxyMessages.getGlobalMessagePrefix() : playerMessagePrefix;
+        String prefix = config ? proxyMessages.getGlobalMessagePrefix() : playerMessagePrefix;
 
         if (discordRoleColor) {
             prefix = colorPrefix(

@@ -30,29 +30,15 @@ import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 import dev.ogblackdiamond.proxymessages.commands.GlobalMessagesCommand;
 import dev.ogblackdiamond.proxymessages.commands.Reload;
 import dev.ogblackdiamond.proxymessages.commands.SetColor;
-import net.kyori.adventure.text.Component;
-import jakarta.xml.bind.DatatypeConverter;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.slf4j.Logger;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.objectmapping.ObjectMapper;
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Processor;
-import org.spongepowered.configurate.objectmapping.meta.PostProcessor;
-import org.spongepowered.configurate.serialize.TypeSerializerCollection;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+
+
 /**
  * Main class for ProxyMessages.
  */
@@ -68,63 +54,28 @@ public class ProxyMessages {
     @DataDirectory
     private final Path dataDirectory;
 
-    private Path database;
-    private List<String> colorMap;
 
     private MessageUtil messageUtil;
     private DiscordUtil discordUtil;
+    private ConfigUtil configUtil;
 
-    private boolean discordEnabled;
-
-    private boolean discordChatSync;
-
-    private boolean resourcePackEnabled;
-    
-    private boolean resourcePackRequired;
-
-    private String resourcePackUrl;
-
-    private byte[] resourcePackHash;
-
-    private Component resourcePackPrompt;
-
-    private ResourcePackInfo resourcePack;
-
-    private List<String> resourcePackExcept;
-
-    private boolean globalJoin;
-    
-    private boolean globalLeave;
-
-    private boolean globalSwitch;
-    
-    private boolean globalMessages;
-
-    private List<String> joinMessageOptions;
-    
-    private List<String> leaveMessageOptions;
-
-    private List<String> switchMessageOptions;
-
-    private String globalMessagePrefix;
-
-    private boolean globalMessageDefault;
 
     private HashMap<UUID, Boolean> playersGlobalChat;
+
+    private ResourcePackInfo resourcePack;
 
     public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("proxymessages:main");
 
     /**
      * Constructor, initializes the logger and the proxy server.
+     * @throws IOException 
      */
     @Inject
-    public ProxyMessages(ProxyServer server, Logger logger, Metrics.Factory metricsFactory, @DataDirectory Path dataDirectory) {
+    public ProxyMessages(ProxyServer server, Logger logger, Metrics.Factory metricsFactory, @DataDirectory Path dataDirectory) throws IOException {
         this.server = server;
         this.logger = logger;
         this.metricsFactory = metricsFactory;
         this.dataDirectory = dataDirectory;
-
-        messageUtil = new MessageUtil(this);
 
         playersGlobalChat = new HashMap<UUID, Boolean>();
 
@@ -136,107 +87,34 @@ public class ProxyMessages {
 
         server.getChannelRegistrar().register(IDENTIFIER);
 
-        initialize(0);
+        initialize();
 
     }
 
     @Subscribe void onProxyShutdown(ProxyShutdownEvent event) throws IOException {
 
-        OutputStream out = Files.newOutputStream(database);
-
-        for (String string : colorMap) {
-            out.write((string + "\n").getBytes());
-        }
-
-        out.close();
-
+        configUtil.saveData();
 
         if (discordUtil != null)
             discordUtil.proxyOffline();
 
     }
 
-    public void initialize(int dummy) throws IOException {
+    public void initialize() throws IOException {
+
+        // instance our main util classes 
+        configUtil = new ConfigUtil(dataDirectory);
+        messageUtil = new MessageUtil(configUtil);
+
 
         int pluginID = 25855;
         Metrics metrics = metricsFactory.make(this, pluginID);
-
-        if (Files.notExists(dataDirectory)) {
-            Files.createDirectory(dataDirectory);
-        }
-        final Path config = dataDirectory.resolve("config.yml");
-        if (Files.notExists(config)) {
-            try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("config.yml")) {
-                Files.createFile(config);
-            }
-        }
-        
-        boolean newFile = false;
-        database = dataDirectory.resolve("database.txt");
-        if (Files.notExists(database)) {
-            newFile = true;
-            try (InputStream dbstream = this.getClass().getClassLoader().getResourceAsStream("database.txt")) {
-                Files.copy(dbstream, database);
-            }
-        }
-
-        colorMap = Files.readAllLines(database);
-
-        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-            .defaultOptions(ConfigurationOptions.defaults())
-            .path(config)
-            .build();
-
-        final CommentedConfigurationNode root = loader.load(
-            ConfigurationOptions.defaults()
-                .serializers(
-                    TypeSerializerCollection.builder()
-                    .registerAnnotatedObjects(
-                        ObjectMapper.factoryBuilder()
-                        .addProcessor(
-                            Comment.class,
-                            Processor.comments()
-                        )
-                        .build()
-                    )
-                    .registerAll(ConfigurationOptions.defaults().serializers())
-                    .build()
-                )
-        );
-
-        ConfigUtil configUtil = root.get(ConfigUtil.class);
-
-        System.out.println(root.raw());
-
-        loader.save(root);
-
-        // adds the default color to the color map
-        if (newFile) colorMap.add(0, "default " + root.node("default-player-color").getString());
-
-        globalJoin = root.node("global-network-join").getBoolean();
-
-        globalLeave = root.node("global-network-leave").getBoolean();
-
-        globalSwitch = root.node("global-network-switch").getBoolean();
-
-        globalMessages = root.node("global-messages").getBoolean();
-        
-        joinMessageOptions = root.node("join-message-options").getList(String.class);
-        leaveMessageOptions = root.node("leave-message-options").getList(String.class);
-        switchMessageOptions = root.node("switch-message-options").getList(String.class);
-
-
-        CommentedConfigurationNode discordOptions = root.node("discord");
-
-        discordEnabled = discordOptions.node("enabled").getBoolean();
-            
-        if (discordEnabled) {
-
-            discordChatSync = discordOptions.node("text-configuration", "player-chat-sync", "enabled").getBoolean();
+               
+        if (configUtil.discordConfig.discordEnabled) {
 
             discordUtil = new DiscordUtil(
                 this,
-                discordOptions
+                configUtil 
             );
 
             String status = discordUtil.getStatus();
@@ -245,26 +123,16 @@ public class ProxyMessages {
                 logger.error(status);
                 return;
             }
-        
             discordUtil.proxyOnline();
         } 
 
-        CommentedConfigurationNode resourcePackOptions = root.node("network-resource-pack");
 
-        resourcePackEnabled = resourcePackOptions.node("enabled").getBoolean();
+        if (configUtil.resourcePackConfig.resourcePackEnabled) {
 
-        if (resourcePackEnabled) {
-
-            resourcePackUrl = resourcePackOptions.node("url").getString();
-            resourcePackHash = DatatypeConverter.parseHexBinary(resourcePackOptions.node("sha1-hash").getString());
-            resourcePackRequired = resourcePackOptions.node("required").getBoolean();
-            resourcePackPrompt = messageUtil.compileColoredMessage(resourcePackOptions.node("prompt").getString()).getComponent();
-            resourcePackExcept = resourcePackOptions.node("except").getList(String.class);
-
-            ResourcePackInfo.Builder builder = server.createResourcePackBuilder(resourcePackUrl);
-            builder.setHash(resourcePackHash);
-            builder.setPrompt(resourcePackPrompt);
-            builder.setShouldForce(resourcePackRequired);
+            ResourcePackInfo.Builder builder = server.createResourcePackBuilder(configUtil.resourcePackConfig.resourcePackURL);
+            builder.setHash(configUtil.resourcePackConfig.resourcePackHash.getBytes());
+            builder.setPrompt(messageUtil.compileColoredMessage(configUtil.resourcePackConfig.resourcePackPrompt).getComponent());
+            builder.setShouldForce(configUtil.resourcePackConfig.resourcePackRequired);
 
             resourcePack = builder.build();
         }
@@ -277,8 +145,8 @@ public class ProxyMessages {
             .build();
 
         SimpleCommand reloadCommand = new Reload(
-            arg0 -> {
-                try {initialize(arg0);}
+            () -> {
+                try {initialize();}
                 catch (IOException e) {e.printStackTrace();}
             }
         );
@@ -293,13 +161,8 @@ public class ProxyMessages {
         commandManager.register(setColorCommandMeta, setColorCommand);
 
         // optional global messages
-        if (globalMessages) {
+        if (configUtil.generalConfig.globalMessages) {
         
-            globalMessagePrefix = root.node("global-message-prefix").getString();
-
-            globalMessageDefault = root.node("global-message-default").getBoolean();
-    
-
             CommandMeta commandMeta = commandManager.metaBuilder("toggleGM")
                 .aliases("tGM", "pmToggle")
                 .plugin(this)
@@ -319,9 +182,9 @@ public class ProxyMessages {
     @Subscribe
     public void onPlayerConnect(ServerPostConnectEvent event) {
 
-        if (event.getPreviousServer() != null && !globalSwitch) return;
+        if (event.getPreviousServer() != null && !configUtil.generalConfig.globalNetworkSwitch) return;
 
-        if (event.getPreviousServer() == null && !globalJoin) return;
+        if (event.getPreviousServer() == null && !configUtil.generalConfig.globalNetworkJoin) return;
 
         Player player = event.getPlayer();
         
@@ -330,9 +193,9 @@ public class ProxyMessages {
         String message;
 
         if (previousServerNull) {
-            message = joinMessageOptions.get((int) (Math.random() * joinMessageOptions.size()));
+            message = configUtil.generalConfig.joinMessageOptions.get((int) (Math.random() * configUtil.generalConfig.joinMessageOptions.size()));
         } else {
-            message = switchMessageOptions.get((int) (Math.random() * switchMessageOptions.size()));
+            message = configUtil.generalConfig.switchMessageOptions.get((int) (Math.random() * configUtil.generalConfig.switchMessageOptions.size()));
         }
 
         sendMessage(
@@ -347,11 +210,11 @@ public class ProxyMessages {
             false
         );
 
-        if (resourcePackEnabled && previousServerNull && !resourcePackExcept.contains(event.getPlayer().getCurrentServer().get().getServerInfo().getName())) {
+        if (configUtil.resourcePackConfig.resourcePackEnabled && previousServerNull && !configUtil.resourcePackConfig.resourcePackExcept.contains(event.getPlayer().getCurrentServer().get().getServerInfo().getName())) {
             event.getPlayer().sendResourcePackOffer(resourcePack);
         }
 
-        if (previousServerNull && globalMessages) playersGlobalChat.put(event.getPlayer().getUniqueId(), globalMessageDefault);
+        if (previousServerNull && configUtil.generalConfig.globalMessages) playersGlobalChat.put(event.getPlayer().getUniqueId(), configUtil.generalConfig.globalMessageDefault);
 
     }
 
@@ -361,7 +224,7 @@ public class ProxyMessages {
     @Subscribe
     public void onPlayerDisconnect(DisconnectEvent event) {
 
-        if (!globalLeave) return;
+        if (!configUtil.generalConfig.globalNetworkLeave) return;
 
         // checks to ensure that a player was actually connected to the server before printing a message
         if (event.getLoginStatus() != DisconnectEvent.LoginStatus.SUCCESSFUL_LOGIN) return;
@@ -374,7 +237,7 @@ public class ProxyMessages {
                 player.getUsername(),
                 player.getCurrentServer().get().getServerInfo().getName(),
                 "",
-                leaveMessageOptions.get((int) (Math.random() * leaveMessageOptions.size()))
+                configUtil.generalConfig.leaveMessageOptions.get((int) (Math.random() * configUtil.generalConfig.leaveMessageOptions.size()))
             ),
             event.getPlayer().getUniqueId(),
             false
@@ -393,13 +256,13 @@ public class ProxyMessages {
             event.getPlayer().getUsername(),
             "",
             event.getPlayer().getCurrentServer().get().getServerInfo().getName(),
-            (globalMessages ? globalMessagePrefix : discordUtil.getPlayerMessagePrefix()) + event.getMessage()
+            (configUtil.generalConfig.globalMessages ? configUtil.generalConfig.globalMessagePrefix : discordUtil.getPlayerMessagePrefix()) + event.getMessage()
         );
 
-        if (discordEnabled && discordChatSync) discordUtil.sendMessage(message.getString(), serverName);
+        if (configUtil.discordConfig.discordEnabled && configUtil.discordChatSyncConfig.discordPlayerChatSyncEnabled) discordUtil.sendMessage(message.getString(), serverName);
 
         // handles global messages
-        if (globalMessages && playersGlobalChat.get(event.getPlayer().getUniqueId())) sendMessage(message, event.getPlayer().getUniqueId(), true);
+        if (configUtil.generalConfig.globalMessages && playersGlobalChat.get(event.getPlayer().getUniqueId())) sendMessage(message, event.getPlayer().getUniqueId(), true);
 
     }
 
@@ -426,7 +289,7 @@ public class ProxyMessages {
             playerName,
             "",
             serverName,
-            globalMessagePrefix + messageData
+            configUtil.generalConfig.globalMessagePrefix + messageData
         );
 
         sendMessageToServer(message, serverName);
@@ -460,37 +323,5 @@ public class ProxyMessages {
     public MessageUtil getMessageUtil() {
         return messageUtil;
     }
-
-    public List<String> getColorMap() {
-        return colorMap;
-    }
-
-    public String getColor(String playerName) {
-        for (String color : colorMap) {
-            if (color.substring(0, color.indexOf(" ")).equals(playerName)){
-                return color.substring(color.indexOf(" ") + 1);
-            } 
-        }
-        return getColor("default");
-    }
-
-    public void appendColorMap(String colorPair) {
-        for (int i = 0; i < colorMap.size(); i++) {
-            if (colorMap.get(i).substring(0, colorMap.get(i).indexOf(" "))
-                .equals(colorPair.substring(0, colorPair.indexOf(" ")))) {
-                colorMap.remove(i);
-            }
-        }
-        colorMap.add(colorPair);
-    }
-
-    public String getGlobalMessagePrefix() {
-        return globalMessagePrefix;
-    }
-
-    public boolean getGlobalMessages() {
-        return globalMessages;
-    }
-
 
 }

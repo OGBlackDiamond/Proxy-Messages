@@ -1,6 +1,5 @@
 package dev.ogblackdiamond.proxymessages.util;
 
-import dev.ogblackdiamond.proxymessages.ProxyMessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -9,7 +8,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public class MessageUtil {
 
-    private ProxyMessages proxyMessages;
+    private ConfigUtil configUtil;
 
     private final String playerStr = "{player}";
     private final int playerNameLength = playerStr.length(); 
@@ -31,8 +30,8 @@ public class MessageUtil {
     private final String obfuscateStr = "{obfuscate}";
     private final int obfuscatedLength = obfuscateStr.length();
 
-    public MessageUtil(ProxyMessages proxyMessages) {
-        this.proxyMessages = proxyMessages;
+    public MessageUtil(ConfigUtil configUtil) {
+        this.configUtil = configUtil;
     }
 
     // compiles the message, interpolating correct strings when needed.
@@ -48,7 +47,7 @@ public class MessageUtil {
         if (playerStrLocation != -1) {
             chosenMessage = 
                 ogString.substring(0, playerStrLocation) 
-                + "{" + proxyMessages.getColor(playerName) + "}"
+                + "{" + configUtil.getColor(playerName) + "}"
                 + ogString.substring(playerStrLocation);
         }
 
