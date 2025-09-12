@@ -32,51 +32,7 @@ public class ConfigUtil {
 
     private Path database;
 
-    public ConfigUtil(Path dataDirectory) throws IOException{
-
-
-        if (Files.notExists(dataDirectory)) {
-            Files.createDirectory(dataDirectory);
-        }
-        final Path config = dataDirectory.resolve("config.yml");
-        if (Files.notExists(config)) {
-            try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("config.yml")) {
-                //Files.copy(stream, config);
-            }
-        }
-        
-        boolean newFile = false;
-        database = dataDirectory.resolve("database.txt");
-        if (Files.notExists(database)) {
-            newFile = true;
-            try (InputStream dbstream = this.getClass().getClassLoader().getResourceAsStream("database.txt")) {
-                Files.copy(dbstream, database);
-            }
-        }
-
-        colorMap = Files.readAllLines(database);
-
-        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-            .path(config)
-            .build();
-
-        final CommentedConfigurationNode rootNode = loader.load(
-            ConfigurationOptions.defaults()
-                .serializers(
-                    TypeSerializerCollection.builder()
-                    .registerAnnotatedObjects(
-                        ObjectMapper.factoryBuilder()
-                        .addProcessor(
-                            Comment.class,
-                            Processor.comments()
-                        )
-                        .build()
-                    )
-                    .registerAll(ConfigurationOptions.defaults().serializers())
-                    .build()
-                )
-        );
-    
+    public ConfigUtil(Path dataDirectory, CommentedConfigurationNode rootNode, YamlConfigurationLoader loader) throws IOException {
 
         generalConfig = rootNode
             .get(GeneralConfig.class);
@@ -94,7 +50,8 @@ public class ConfigUtil {
 
         loader.save(rootNode);
 
-        if (newFile) colorMap.add(0, "default " + generalConfig.defaultPlayerColor);
+        //if (newFile) 
+        colorMap.add(0, "default " + generalConfig.defaultPlayerColor);
 
     }
 
@@ -109,7 +66,6 @@ public class ConfigUtil {
         out.close();
 
     }
-
 
 
     public List<String> getColorMap() {
@@ -135,14 +91,6 @@ public class ConfigUtil {
         colorMap.add(colorPair);
     }
 
-    public String getGlobalMessagePrefix() {
-        return generalConfig.globalMessagePrefix;
-    }
-
-    public boolean getGlobalMessages() {
-        return generalConfig.globalMessages;
-    }
-
 
 ////////////////////////////////////////////
 /////////////// CLASSES ///////////////////
@@ -152,7 +100,7 @@ public class ConfigUtil {
 
 
         @Setting(value="global-network-join")
-        @Comment(value="enables a network-wide join message for when a player joins the network", override=true)  
+        @Comment(value="enables a network-wide join message for when a player joins the network")  
         public boolean globalNetworkJoin = true;
 
         @Setting(value="global-network-leave")
@@ -279,6 +227,9 @@ public class ConfigUtil {
         @Comment(value="on startup and shutdown, include an image in the embed")
         public boolean discordDisplayIcon = false;
 
+        @Setting(value="discord-role-color")
+        @Comment(value="color player's names in game with their discord role color")
+        public boolean discordRoleColor = true;
 
         @Setting(value="player-chat-sync")
         @Comment(value="whether or not to sync player chat with discord")

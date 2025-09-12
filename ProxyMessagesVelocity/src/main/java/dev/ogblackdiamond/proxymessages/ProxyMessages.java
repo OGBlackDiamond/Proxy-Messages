@@ -34,9 +34,18 @@ import dev.ogblackdiamond.proxymessages.commands.SetColor;
 import java.util.HashMap;
 import java.util.UUID;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.slf4j.Logger;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Processor;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 
 /**
@@ -77,8 +86,6 @@ public class ProxyMessages {
         this.metricsFactory = metricsFactory;
         this.dataDirectory = dataDirectory;
 
-        playersGlobalChat = new HashMap<UUID, Boolean>();
-
         logger.info("Thank you for using ProxyMessages");
     }
 
@@ -102,10 +109,67 @@ public class ProxyMessages {
 
     public void initialize() throws IOException {
 
+
+
+
+        if (Files.notExists(dataDirectory)) {
+            Files.createDirectory(dataDirectory);
+        }
+
+        final Path config = dataDirectory.resolve("config.yml");
+        if (Files.notExists(config)) {
+            try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("config.yml")) {
+                //Files.copy(stream, config);
+            }
+        }
+        
+        /*
+        boolean newFile = false;
+        database = dataDirectory.resolve("database.txt");
+        if (Files.notExists(database)) {
+            newFile = true;
+            try (InputStream dbstream = this.getClass().getClassLoader().getResourceAsStream("database.txt")) {
+                Files.copy(dbstream, database);
+            }
+        }
+
+        colorMap = Files.readAllLines(database);
+        */
+
+        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+            .path(config)
+            .build();
+
+        final CommentedConfigurationNode rootNode = loader.load(
+            ConfigurationOptions.defaults()
+                .serializers(
+                    TypeSerializerCollection.builder()
+                    .registerAnnotatedObjects(
+                        ObjectMapper.factoryBuilder()
+                        .addProcessor(
+                            Comment.class,
+                            Processor.comments()
+                        )
+                        .build()
+                    )
+                    .registerAll(ConfigurationOptions.defaults().serializers())
+                    .build()
+                )
+        );
+
+
+
+
+
+
+
         // instance our main util classes 
-        configUtil = new ConfigUtil(dataDirectory);
+        configUtil = new ConfigUtil(dataDirectory, rootNode, loader);
         messageUtil = new MessageUtil(configUtil);
 
+        // TODO: put a class in its own file and initialize it seperately to see if this works
+
+        playersGlobalChat = new HashMap<UUID, Boolean>();
 
         int pluginID = 25855;
         Metrics metrics = metricsFactory.make(this, pluginID);
@@ -114,6 +178,7 @@ public class ProxyMessages {
 
             discordUtil = new DiscordUtil(
                 this,
+                messageUtil,
                 configUtil 
             );
 
@@ -155,7 +220,7 @@ public class ProxyMessages {
             .aliases("setColor")
             .build();
 
-        SimpleCommand setColorCommand = new SetColor(this);
+        SimpleCommand setColorCommand = new SetColor(configUtil);
 
         commandManager.register(reloadCommandMeta, reloadCommand);
         commandManager.register(setColorCommandMeta, setColorCommand);
@@ -256,7 +321,7 @@ public class ProxyMessages {
             event.getPlayer().getUsername(),
             "",
             event.getPlayer().getCurrentServer().get().getServerInfo().getName(),
-            (configUtil.generalConfig.globalMessages ? configUtil.generalConfig.globalMessagePrefix : discordUtil.getPlayerMessagePrefix()) + event.getMessage()
+            (configUtil.generalConfig.globalMessages ? configUtil.generalConfig.globalMessagePrefix : configUtil.discordChatSyncConfig.discordPlayerChatSyncMessagePrefix) + event.getMessage()
         );
 
         if (configUtil.discordConfig.discordEnabled && configUtil.discordChatSyncConfig.discordPlayerChatSyncEnabled) discordUtil.sendMessage(message.getString(), serverName);

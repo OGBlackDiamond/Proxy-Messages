@@ -4,7 +4,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 
-import dev.ogblackdiamond.proxymessages.ProxyMessages;
+import dev.ogblackdiamond.proxymessages.util.ConfigUtil;
 import dev.ogblackdiamond.proxymessages.util.HexUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,10 +13,10 @@ import net.kyori.adventure.text.format.TextColor;
 
 public final class SetColor implements SimpleCommand {
 
-    private ProxyMessages proxyMessages;
+    private ConfigUtil configUtil;
 
-    public SetColor(ProxyMessages proxyMessages) {
-        this.proxyMessages = proxyMessages;
+    public SetColor(ConfigUtil configUtil) {
+        this.configUtil= configUtil;
     }
 
     @Override
@@ -50,7 +50,7 @@ public final class SetColor implements SimpleCommand {
                 playerName = player.getUsername();
             }
 
-            proxyMessages.appendColorMap(playerName + " " + args[0]);
+            configUtil.appendColorMap(playerName + " " + args[0]);
 
             source.sendMessage(
                 Component.text(playerName + " name color set to ", NamedTextColor.WHITE).append(

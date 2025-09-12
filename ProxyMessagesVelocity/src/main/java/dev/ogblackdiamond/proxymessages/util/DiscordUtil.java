@@ -6,11 +6,10 @@ import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.Color;
-import java.io.File; import java.util.HashMap;
-import java.util.Map; import java.util.Set;
+import java.io.File; 
+import java.util.HashMap;
 import java.util.UUID;
 
-import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -208,10 +207,6 @@ public class DiscordUtil implements EventListener {
         return status;
     }
 
-    public String getPlayerMessagePrefix() {
-        return playerMessagePrefix;
-    }
-
     // returns if the message channel is not null
     public boolean checkMessageChannel() {
         boolean channel = messageChannel == null;
@@ -226,14 +221,14 @@ public class DiscordUtil implements EventListener {
 
         if (messageEvent.getAuthor().isBot() || messageEvent.getAuthor().isSystem()) return;
 
-        if (!playerChatSyncEnabled) return;
+        if (!configUtil.discordChatSyncConfig.discordPlayerChatSyncEnabled) return;
 
 
         String channelID = messageEvent.getChannel().getId();
 
-        String prefix = config ? proxyMessages.getGlobalMessagePrefix() : playerMessagePrefix;
+        String prefix = configUtil.generalConfig.globalMessages ? configUtil.generalConfig.globalMessagePrefix : configUtil.discordChatSyncConfig.discordPlayerChatSyncMessagePrefix;
 
-        if (discordRoleColor) {
+        if (configUtil.discordTextConfig.discordRoleColor) {
             prefix = colorPrefix(
                 prefix,
                 messageEvent.getMember().getColor()
@@ -252,7 +247,7 @@ public class DiscordUtil implements EventListener {
 
 
         // sends the message globally if it's in the global channel
-        if (proxyChannelID.equals(channelID)) {
+        if (configUtil.discordConfig.discordProxyChannelID.equals(channelID)) {
             proxyMessages.sendMessage(message);
             return;
         }
