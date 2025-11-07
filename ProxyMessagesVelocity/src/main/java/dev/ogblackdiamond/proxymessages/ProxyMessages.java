@@ -2,7 +2,6 @@ package dev.ogblackdiamond.proxymessages;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
@@ -25,7 +24,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil;
 import dev.ogblackdiamond.proxymessages.util.Metrics;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
-import dev.ogblackdiamond.proxymessages.util.ConfigUtil;
+import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
 import dev.ogblackdiamond.proxymessages.util.DiscordUtil;
 import dev.ogblackdiamond.proxymessages.commands.GlobalMessagesCommand;
 import dev.ogblackdiamond.proxymessages.commands.Reload;
@@ -34,18 +33,9 @@ import dev.ogblackdiamond.proxymessages.commands.SetColor;
 import java.util.HashMap;
 import java.util.UUID;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.slf4j.Logger;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.objectmapping.ObjectMapper;
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Processor;
-import org.spongepowered.configurate.serialize.TypeSerializerCollection;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 
 /**
@@ -102,72 +92,16 @@ public class ProxyMessages {
 
         configUtil.saveData();
 
-        if (discordUtil != null)
+        if (configUtil.discordConfig.discordEnabled)
             discordUtil.proxyOffline();
 
     }
 
     public void initialize() throws IOException {
 
-
-
-
-        if (Files.notExists(dataDirectory)) {
-            Files.createDirectory(dataDirectory);
-        }
-
-        final Path config = dataDirectory.resolve("config.yml");
-        if (Files.notExists(config)) {
-            try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("config.yml")) {
-                //Files.copy(stream, config);
-            }
-        }
-        
-        /*
-        boolean newFile = false;
-        database = dataDirectory.resolve("database.txt");
-        if (Files.notExists(database)) {
-            newFile = true;
-            try (InputStream dbstream = this.getClass().getClassLoader().getResourceAsStream("database.txt")) {
-                Files.copy(dbstream, database);
-            }
-        }
-
-        colorMap = Files.readAllLines(database);
-        */
-
-        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-            .path(config)
-            .build();
-
-        final CommentedConfigurationNode rootNode = loader.load(
-            ConfigurationOptions.defaults()
-                .serializers(
-                    TypeSerializerCollection.builder()
-                    .registerAnnotatedObjects(
-                        ObjectMapper.factoryBuilder()
-                        .addProcessor(
-                            Comment.class,
-                            Processor.comments()
-                        )
-                        .build()
-                    )
-                    .registerAll(ConfigurationOptions.defaults().serializers())
-                    .build()
-                )
-        );
-
-
-
-
-
-
-
         // instance our main util classes 
-        configUtil = new ConfigUtil(dataDirectory, rootNode, loader);
+        configUtil = new ConfigUtil(dataDirectory);
         messageUtil = new MessageUtil(configUtil);
-
-        // TODO: put a class in its own file and initialize it seperately to see if this works
 
         playersGlobalChat = new HashMap<UUID, Boolean>();
 
@@ -369,7 +303,7 @@ public class ProxyMessages {
 
             srvr.sendMessage(message.getComponent());
         }
-        if (discordUtil != null && !exceptPlayerServer) discordUtil.playerNotification(message, uuid);
+        if (configUtil.discordConfig.discordEnabled && !exceptPlayerServer) discordUtil.playerNotification(message, uuid);
     }
 
     public void sendMessage(MessageReturns message) {

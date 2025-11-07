@@ -15,6 +15,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.ProxyMessages;
+import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -107,6 +108,7 @@ public class DiscordUtil implements EventListener {
 
         if (configUtil.discordConfig.discordBotToken.substring(0, 1).equals("^") || configUtil.discordConfig.discordProxyChannelID.substring(0, 1).equals("^") || !validChannelIDs) {
             status = "Invalid channel or token provided!";
+            configUtil.discordConfig.discordEnabled = false;
             return;
         }
 
@@ -242,7 +244,8 @@ public class DiscordUtil implements EventListener {
             messageEvent.getAuthor().getEffectiveName(),
             "",
             "Discord",
-            prefix + messageEvent.getMessage().getContentRaw()
+            prefix + messageEvent.getMessage().getContentRaw(),
+            true
         );
 
 

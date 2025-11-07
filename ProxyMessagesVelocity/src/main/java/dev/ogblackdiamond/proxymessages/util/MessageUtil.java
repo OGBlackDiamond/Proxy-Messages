@@ -1,5 +1,6 @@
 package dev.ogblackdiamond.proxymessages.util;
 
+import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -35,7 +36,7 @@ public class MessageUtil {
     }
 
     // compiles the message, interpolating correct strings when needed.
-    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString) {
+    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString, boolean fromDiscord) {
 
         TextComponent.Builder finalMessage = Component.text();
 
@@ -44,7 +45,7 @@ public class MessageUtil {
 
 
         int playerStrLocation = ogString.indexOf(playerStr);
-        if (playerStrLocation != -1) {
+        if (playerStrLocation != -1 || !fromDiscord) {
             chosenMessage = 
                 ogString.substring(0, playerStrLocation) 
                 + "{" + configUtil.getColor(playerName) + "}"
@@ -80,6 +81,15 @@ public class MessageUtil {
 
         return compileColoredMessage(finalString, type);
     }
+
+    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString) {
+        return compileFormattedMessage(
+            type, playerName, previousServer, newServer, ogString, false
+        );
+    }
+
+
+
 
     public MessageReturns compileColoredMessage(String coloredString) {
         return compileColoredMessage(coloredString, "");

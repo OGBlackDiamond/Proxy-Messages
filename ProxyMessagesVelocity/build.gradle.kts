@@ -10,6 +10,10 @@ repositories {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+    maven{
+        name = "4.2.0-GeyserMC-SNAPSHOT"
+        url = uri("https://repo.opencollab.dev/maven-snapshots")
+    }
 }
 
 dependencies {
@@ -18,7 +22,9 @@ dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 
-    implementation("org.spongepowered:configurate-yaml:4.2.0")
+    //implementation("org.spongepowered:configurate-yaml:4.3.0-SNAPSHOT")
+    implementation("org.spongepowered:configurate-yaml:4.2.0-GeyserMC-SNAPSHOT")
+
 
     implementation("net.dv8tion:JDA:5.6.1")
 
@@ -49,4 +55,7 @@ tasks.shadowJar {
     archiveClassifier.set("")
     archiveVersion.set("3.5.0")
     minimize()
+
+    relocate("org.spongepowered.configurate", "dev.ogblackdiamond.libs.configurate")
+    relocate("org.spongepowered.configurate-yaml", "dev.ogblackdiamond.libs.configurate-yaml")
 }

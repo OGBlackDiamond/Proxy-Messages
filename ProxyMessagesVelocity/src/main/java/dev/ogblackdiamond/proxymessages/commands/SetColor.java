@@ -4,7 +4,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 
-import dev.ogblackdiamond.proxymessages.util.ConfigUtil;
+import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
 import dev.ogblackdiamond.proxymessages.util.HexUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
