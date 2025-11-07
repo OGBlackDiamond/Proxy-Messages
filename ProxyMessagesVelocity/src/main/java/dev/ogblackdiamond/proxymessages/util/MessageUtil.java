@@ -1,6 +1,6 @@
 package dev.ogblackdiamond.proxymessages.util;
 
-import dev.ogblackdiamond.proxymessages.ProxyMessages;
+import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -9,7 +9,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 public class MessageUtil {
 
-    private ProxyMessages proxyMessages;
+    private ConfigUtil configUtil;
 
     private final String playerStr = "{player}";
     private final int playerNameLength = playerStr.length(); 
@@ -31,12 +31,12 @@ public class MessageUtil {
     private final String obfuscateStr = "{obfuscate}";
     private final int obfuscatedLength = obfuscateStr.length();
 
-    public MessageUtil(ProxyMessages proxyMessages) {
-        this.proxyMessages = proxyMessages;
+    public MessageUtil(ConfigUtil configUtil) {
+        this.configUtil = configUtil;
     }
 
     // compiles the message, interpolating correct strings when needed.
-    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString) {
+    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString, boolean fromDiscord) {
 
         TextComponent.Builder finalMessage = Component.text();
 
@@ -45,10 +45,10 @@ public class MessageUtil {
 
 
         int playerStrLocation = ogString.indexOf(playerStr);
-        if (playerStrLocation != -1) {
+        if (playerStrLocation != -1 || !fromDiscord) {
             chosenMessage = 
                 ogString.substring(0, playerStrLocation) 
-                + "{" + proxyMessages.getColor(playerName) + "}"
+                + "{" + configUtil.getColor(playerName) + "}"
                 + ogString.substring(playerStrLocation);
         }
 
@@ -81,6 +81,15 @@ public class MessageUtil {
 
         return compileColoredMessage(finalString, type);
     }
+
+    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString) {
+        return compileFormattedMessage(
+            type, playerName, previousServer, newServer, ogString, false
+        );
+    }
+
+
+
 
     public MessageReturns compileColoredMessage(String coloredString) {
         return compileColoredMessage(coloredString, "");

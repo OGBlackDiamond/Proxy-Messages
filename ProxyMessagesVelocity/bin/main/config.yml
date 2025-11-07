@@ -5,6 +5,7 @@ global-network-join: true
 global-network-leave: true
 
 # enables a network-wide message that notifies players when a player switches between servers when true global-network-switch: true
+global-network-switch: true
 
 # enables a network-wide messaging system that allows players to communicate between servers on the proxy
 global-messages: true
@@ -23,6 +24,7 @@ join-message-options:
 
 # options from this list will be randomly chosen to be displayed when a player leaves the network
 # {player} will be replaced by the player name leave-message-options:
+leave-message-options:
   - "{player} left the network"
 
 # options from this list will be randomly chosen to be displayed when a player changes between two servers on the network 
@@ -84,6 +86,11 @@ discord:
     online-message: "## Proxy Online"
     offline-message: "## Proxy Offline"
 
+    # on proxy startup, lists available servers
+    server-count: true
+
+    # on startup and shutdown, show an image if you provided one
+    display-icon: false
 
     # whether or not to sync player chat with discord
     player-chat-sync:
@@ -95,6 +102,9 @@ discord:
       # this only applies when global messaging is disabled
       player-message-prefix: "[{cur}] - <{player}>: "
 
+      # replaces the set color for a player's name with a user's role color
+      # when sending messages from discord to minecraft
+      discord-role-color: true
 
       # the servers (as listed in your velocity.toml) and their corresponding channel id
       # each server will report its activity to it's specified channel
@@ -102,13 +112,3 @@ discord:
         ^lobby: "lobby-channel-id"
         ^vanilla: "vanilla-channel-id"
 
-
-    # replaces the set color for a player's name with a user's role color
-    # when sending messages from discord to minecraft
-    discord-role-color: true
-
-    # on proxy startup, lists available servers
-    server-count: true
-
-    # on startup and shutdown, show an image if you provided one
-    display-icon: false
