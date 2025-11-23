@@ -111,4 +111,3 @@ discord:
       server-channel-ids: 
         ^lobby: "lobby-channel-id"
         ^vanilla: "vanilla-channel-id"
-
