@@ -1,7 +1,6 @@
 package dev.ogblackdiamond.proxymessages.config;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
@@ -9,10 +8,6 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
 public class DiscordChatSyncConfig {
-
-    DiscordChatSyncConfig() {
-        discordServerIDs = discordPlayerChatSyncChannelIDs.keySet();
-    }
 
     @Setting(value="enabled")
     @Comment(value="enable discord chat sync")
@@ -28,8 +23,6 @@ public class DiscordChatSyncConfig {
         Map.of("^lobby", "lobby-channel-id",
                 "^vanilla", "vanilla-channel-id");
 
-    // load in the real values, we unfortunately can't do this automatically
-    public Set<String> discordServerIDs ;
 }
 
 

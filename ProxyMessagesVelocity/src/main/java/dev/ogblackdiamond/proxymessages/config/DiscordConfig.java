@@ -1,7 +1,5 @@
 package dev.ogblackdiamond.proxymessages.config;
 
-import java.util.List;
-
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;

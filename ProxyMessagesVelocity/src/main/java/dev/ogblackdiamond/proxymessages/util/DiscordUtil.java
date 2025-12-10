@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import java.awt.Color;
 import java.io.File; 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -41,6 +42,7 @@ public class DiscordUtil implements EventListener {
     private boolean imageExists;
 
     private HashMap<String, TextChannel> serverNameIDPairs;
+    public Set<String> discordServerIDs ;
 
     private Color joinColor;
     private Color leaveColor;
@@ -97,26 +99,20 @@ public class DiscordUtil implements EventListener {
 
         serverNameIDPairs = new HashMap<String, TextChannel>();
  
-        boolean validChannelIDs = true;
+        discordServerIDs = configUtil.discordChatSyncConfig.discordPlayerChatSyncChannelIDs.keySet();
 
-        for (String id : serverNameIDPairs.keySet()) {
-            if (id.substring(0, 1).equals("^")) {
-                validChannelIDs = false;
-                break;
-            }
-        }
-
-        if (configUtil.discordConfig.discordBotToken.substring(0, 1).equals("^") || configUtil.discordConfig.discordProxyChannelID.substring(0, 1).equals("^") || !validChannelIDs) {
-            status = "Invalid channel or token provided!";
-            configUtil.discordConfig.discordEnabled = false;
-            return;
-        }
-
-        for (String server : configUtil.discordChatSyncConfig.discordServerIDs) {
+        for (String server : discordServerIDs) {
+            if (server.substring(0, 1).equals("^")) continue;
             serverNameIDPairs.put(
                 server,
                 jda.getChannelById(TextChannel.class, configUtil.discordChatSyncConfig.discordPlayerChatSyncChannelIDs.get(server))
             );
+        }
+
+        if (configUtil.discordConfig.discordBotToken.substring(0, 1).equals("^") || configUtil.discordConfig.discordProxyChannelID.substring(0, 1).equals("^")) {
+            status = "Invalid channel or token provided!";
+            configUtil.discordConfig.discordEnabled = false;
+            return;
         }
 
         status = "good";
@@ -218,6 +214,9 @@ public class DiscordUtil implements EventListener {
 
     @Override
     public void onEvent(GenericEvent event) {
+
+        if (!configUtil.discordChatSyncConfig.discordPlayerChatSyncEnabled) return;
+
         if (event.getClass() != MessageReceivedEvent.class) return;
         MessageReceivedEvent messageEvent = (MessageReceivedEvent) event;
 
