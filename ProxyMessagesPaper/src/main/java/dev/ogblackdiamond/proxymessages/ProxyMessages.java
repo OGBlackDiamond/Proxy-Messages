@@ -41,7 +41,7 @@ public class ProxyMessages extends JavaPlugin implements Listener {
         event.quitMessage(null);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAsyncPlayerChat(AsyncChatEvent event) {
         
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
