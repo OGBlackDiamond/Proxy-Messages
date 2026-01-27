@@ -31,6 +31,8 @@ public class MessageUtil {
     private final String obfuscateStr = "{obfuscate}";
     private final int obfuscatedLength = obfuscateStr.length();
 
+    private final TextColor defaultTextColor = NamedTextColor.YELLOW;
+
     public MessageUtil(ConfigUtil configUtil) {
         this.configUtil = configUtil;
     }
@@ -38,18 +40,35 @@ public class MessageUtil {
     // compiles the message, interpolating correct strings when needed.
     public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString, boolean fromDiscord) {
 
-        TextComponent.Builder finalMessage = Component.text();
-
         String chosenMessage = ogString;
         String finalString = "";
 
 
+        // inject the custom player name color
         int playerStrLocation = ogString.indexOf(playerStr);
+        
         if (playerStrLocation != -1 || !fromDiscord) {
+
+            int previousColorLocation = ogString.indexOf("{#");
+            int prevPrevColorLoc = previousColorLocation;
+            // find the closest color definition to the player name
+            while (previousColorLocation != -1 && previousColorLocation < playerStrLocation) {
+                prevPrevColorLoc = previousColorLocation;
+                previousColorLocation = ogString.indexOf("{#", prevPrevColorLoc);
+            }
+            previousColorLocation = prevPrevColorLoc;
+            String previousColor = "{" + defaultTextColor.asHexString() + "}";
+            // return the string to the previously existing color
+            if (previousColorLocation < playerStrLocation && previousColorLocation != -1){
+                previousColor = ogString.substring(previousColorLocation, previousColorLocation + colorLength);
+            }
+
             chosenMessage = 
                 ogString.substring(0, playerStrLocation) 
                 + "{" + configUtil.getColor(playerName) + "}"
-                + ogString.substring(playerStrLocation);
+                + ogString.substring(playerStrLocation, playerStrLocation + playerNameLength)
+                + previousColor
+                + ogString.substring(playerStrLocation + playerNameLength);
         }
 
         int messageLength = chosenMessage.length();
@@ -62,22 +81,20 @@ public class MessageUtil {
             boolean previousServerLength = i + previousServerNameLength > messageLength;
 
             if (!atLength && chosenMessage.substring(i, i + playerNameLength).equals(playerStr)) {
-                finalMessage.append(Component.text(playerName).decoration(TextDecoration.BOLD, true));
                 finalString += playerName;
                 i += playerNameLength - 1;
             } else if (!previousServerLength && chosenMessage.substring(i, i + previousServerNameLength).equals(previousServerNameStr)) {
-                finalMessage.append(Component.text(previousServer).decoration(TextDecoration.BOLD, true));
                 finalString += previousServer;
                 i += previousServerNameLength - 1;
             } else if (!newServerLength && chosenMessage.substring(i, i + newServerNameLength).equals(newSeverNameStr)) {
-                finalMessage.append(Component.text(newServer).decoration(TextDecoration.BOLD, true));
                 finalString += newServer;
                 i += newServerNameLength - 1;
             } else {
-               finalMessage.append(Component.text(chosenMessage.substring(i, i+1)).decoration(TextDecoration.BOLD, false));
-               finalString += chosenMessage.substring(i, i+1);
+                finalString += chosenMessage.substring(i, i+1);
             }
         }
+
+        System.out.println(finalString);
 
         return compileColoredMessage(finalString, type);
     }
@@ -99,7 +116,7 @@ public class MessageUtil {
     public MessageReturns compileColoredMessage(String coloredString, String type) {
 
         TextComponent.Builder finalMessage = Component.text();
-        TextColor textColor = NamedTextColor.YELLOW;
+        TextColor textColor = defaultTextColor;
 
         boolean isBold = false;
         boolean isItalic = false;
