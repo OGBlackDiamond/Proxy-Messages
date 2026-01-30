@@ -94,7 +94,6 @@ public class MessageUtil {
             }
         }
 
-        System.out.println(finalString);
 
         return compileColoredMessage(finalString, type);
     }

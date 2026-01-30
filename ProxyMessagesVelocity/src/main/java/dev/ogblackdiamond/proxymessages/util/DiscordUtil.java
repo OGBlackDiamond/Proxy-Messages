@@ -49,21 +49,25 @@ public class DiscordUtil implements EventListener {
     private Color switchColor;
 
 
-    public DiscordUtil(ProxyMessages proxyMessages, MessageUtil messageUtil, ConfigUtil configUtil) throws SerializationException {
+    public DiscordUtil(ProxyMessages proxyMessages, MessageUtil messageUtil, ConfigUtil configUtil) {
 
         this.proxyMessages = proxyMessages;
         this.messageUtil = messageUtil;
         this.configUtil = configUtil;
 
-        File imageFile = new File("plugins/proxymessages/icon.jpg");
+        try {
+            File imageFile = new File("plugins/proxymessages/icon.jpg");
 
-        if (imageFile != null && configUtil.discordTextConfig.discordDisplayIcon) {
-            file = FileUpload.fromData(imageFile, "icon.jpg");
-            imageExists = true;
-        } else {
+            if (imageFile != null && configUtil.discordTextConfig.discordDisplayIcon) {
+                file = FileUpload.fromData(imageFile, "icon.jpg");
+                imageExists = true;
+            } else {
+                imageExists = false;
+            }
+        } catch (NullPointerException e) {
+            status = "Invalid image file provided!";
             imageExists = false;
         }
-
        
         // load and validate colors from config
         if(!HexUtil.isValidHex(configUtil.discordConfig.discordJoinColor)){

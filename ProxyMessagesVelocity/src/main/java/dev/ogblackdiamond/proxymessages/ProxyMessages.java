@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.5.2",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.5.3",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -118,7 +118,7 @@ public class ProxyMessages {
 
             String status = discordUtil.getStatus();
 
-            if (!status.equals("good") || discordUtil.checkMessageChannel()) {
+            if (!status.equals("good")) {
                 logger.error(status);
                 return;
             }
