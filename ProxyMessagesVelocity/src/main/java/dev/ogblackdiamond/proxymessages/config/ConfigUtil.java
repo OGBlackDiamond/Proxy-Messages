@@ -25,7 +25,7 @@ public class ConfigUtil {
 
     public List<String> colorMap;
 
-    private Path database;
+    private final Path database;
 
     public ConfigUtil(Path dataDirectory) throws IOException {
 
@@ -40,11 +40,8 @@ public class ConfigUtil {
             }
         }
         
-        boolean newFile = false;
-
         database = dataDirectory.resolve("database.txt");
         if (Files.notExists(database)) {
-            newFile = true;
             try (InputStream dbstream = this.getClass().getClassLoader().getResourceAsStream("database.txt")) {
                 Files.copy(dbstream, database);
             }
@@ -90,9 +87,6 @@ public class ConfigUtil {
 
         loader.save(rootNode);
 
-        if (newFile) 
-        colorMap.add(0, "default " + generalConfig.defaultPlayerColor);
-
     }
 
     public void saveData() throws IOException {
@@ -118,11 +112,12 @@ public class ConfigUtil {
                 return color.substring(color.indexOf(" ") + 1);
             } 
         }
-        return getColor("default");
+        return generalConfig.defaultPlayerColor;
     }
 
     public void appendColorMap(String colorPair) {
         for (int i = 0; i < colorMap.size(); i++) {
+            // check if the user already has a color, and remove it if so
             if (colorMap.get(i).substring(0, colorMap.get(i).indexOf(" "))
                 .equals(colorPair.substring(0, colorPair.indexOf(" ")))) {
                 colorMap.remove(i);

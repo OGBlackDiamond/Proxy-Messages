@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
-import org.spongepowered.configurate.serialize.SerializationException;
-
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.ProxyMessages;

@@ -54,7 +54,7 @@ public class MessageUtil {
             // find the closest color definition to the player name
             while (previousColorLocation != -1 && previousColorLocation < playerStrLocation) {
                 prevPrevColorLoc = previousColorLocation;
-                previousColorLocation = ogString.indexOf("{#", prevPrevColorLoc);
+                previousColorLocation = ogString.indexOf("{#", prevPrevColorLoc + 1);
             }
             previousColorLocation = prevPrevColorLoc;
             String previousColor = "{" + defaultTextColor.asHexString() + "}";

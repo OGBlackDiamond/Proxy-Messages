@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.5.3",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.5.5",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -84,7 +84,47 @@ public class ProxyMessages {
 
         server.getChannelRegistrar().register(IDENTIFIER);
 
+        int pluginID = 25855;
+        Metrics metrics = metricsFactory.make(this, pluginID);
+
         initialize();
+
+        // initialize command stuff
+        CommandManager commandManager = server.getCommandManager();
+        
+        CommandMeta reloadCommandMeta = commandManager.metaBuilder("pmReload")
+            .aliases("reloadPM")
+            .build();
+
+        SimpleCommand reloadCommand = new Reload(
+            () -> {
+                try {configUtil.saveData(); initialize();}
+                catch (IOException e) {e.printStackTrace();}
+            }
+        );
+
+        CommandMeta setColorCommandMeta = commandManager.metaBuilder("set-color")
+            .aliases("setColor")
+            .build();
+
+        SimpleCommand setColorCommand = new SetColor(configUtil);
+
+        commandManager.register(reloadCommandMeta, reloadCommand);
+        commandManager.register(setColorCommandMeta, setColorCommand);
+
+        // optional global messages
+        if (configUtil.generalConfig.globalMessages) {
+
+            CommandMeta commandMeta = commandManager.metaBuilder("toggleGM")
+                .aliases("tGM", "pmToggle")
+                .plugin(this)
+                .build();
+            SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(playersGlobalChat);
+
+            commandManager.register(commandMeta, globalMessagesCommand);
+
+        }
+
 
     }
 
@@ -94,7 +134,6 @@ public class ProxyMessages {
 
         if (configUtil.discordConfig.discordEnabled)
             discordUtil.proxyOffline();
-
     }
 
     public void initialize() throws IOException {
@@ -105,9 +144,6 @@ public class ProxyMessages {
 
         playersGlobalChat = new HashMap<UUID, Boolean>();
 
-        int pluginID = 25855;
-        Metrics metrics = metricsFactory.make(this, pluginID);
-               
         if (configUtil.discordConfig.discordEnabled) {
 
             discordUtil = new DiscordUtil(
@@ -135,44 +171,6 @@ public class ProxyMessages {
 
             resourcePack = builder.build();
         }
-
-        // initialize command stuff
-        CommandManager commandManager = server.getCommandManager();
-        
-        CommandMeta reloadCommandMeta = commandManager.metaBuilder("pmReload")
-            .aliases("reloadPM")
-            .build();
-
-        SimpleCommand reloadCommand = new Reload(
-            () -> {
-                try {initialize();}
-                catch (IOException e) {e.printStackTrace();}
-            }
-        );
-
-        CommandMeta setColorCommandMeta = commandManager.metaBuilder("set-color")
-            .aliases("setColor")
-            .build();
-
-        SimpleCommand setColorCommand = new SetColor(configUtil);
-
-        commandManager.register(reloadCommandMeta, reloadCommand);
-        commandManager.register(setColorCommandMeta, setColorCommand);
-
-        // optional global messages
-        if (configUtil.generalConfig.globalMessages) {
-        
-            CommandMeta commandMeta = commandManager.metaBuilder("toggleGM")
-                .aliases("tGM", "pmToggle")
-                .plugin(this)
-                .build();
-
-            SimpleCommand globalMessagesCommand = new GlobalMessagesCommand(playersGlobalChat);
-
-            commandManager.register(commandMeta, globalMessagesCommand);
-
-        }
-
     }
 
     /**
