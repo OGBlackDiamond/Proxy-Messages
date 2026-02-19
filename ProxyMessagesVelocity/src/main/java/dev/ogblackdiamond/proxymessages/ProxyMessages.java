@@ -87,6 +87,8 @@ public class ProxyMessages {
         int pluginID = 25855;
         Metrics metrics = metricsFactory.make(this, pluginID);
 
+        playersGlobalChat = new HashMap<UUID, Boolean>();
+
         initialize();
 
         // initialize command stuff
@@ -103,14 +105,19 @@ public class ProxyMessages {
             }
         );
 
-        CommandMeta setColorCommandMeta = commandManager.metaBuilder("set-color")
-            .aliases("setColor")
-            .build();
-
-        SimpleCommand setColorCommand = new SetColor(configUtil);
-
         commandManager.register(reloadCommandMeta, reloadCommand);
-        commandManager.register(setColorCommandMeta, setColorCommand);
+
+        if (configUtil.generalConfig.chooseColor) {
+
+            CommandMeta setColorCommandMeta = commandManager.metaBuilder("set-color")
+                .aliases("setColor")
+                .build();
+
+            SimpleCommand setColorCommand = new SetColor(configUtil);
+
+            commandManager.register(setColorCommandMeta, setColorCommand);
+
+        }
 
         // optional global messages
         if (configUtil.generalConfig.globalMessages) {
@@ -142,7 +149,6 @@ public class ProxyMessages {
         configUtil = new ConfigUtil(dataDirectory);
         messageUtil = new MessageUtil(configUtil);
 
-        playersGlobalChat = new HashMap<UUID, Boolean>();
 
         if (configUtil.discordConfig.discordEnabled) {
 

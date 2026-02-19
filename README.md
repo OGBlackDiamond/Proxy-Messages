@@ -36,6 +36,7 @@ Two sets of these tags will "open" and "close" their syle. For example, you can 
 
 ### Key Configuration Options:
 * `default-player-color`: The default color for players who havent set a color for their name.
+* `choose-color`: Whether or not players are allowed to set the color of their name.
 * `global-network-join`: Toggle the join message for all users when a player joins the network.
 * `global-network-leave`: Toggle the leave message for all users when a player leaves the network.
 * `global-network-switch`: Toggle the server switch message for all users when a player moves between servers.

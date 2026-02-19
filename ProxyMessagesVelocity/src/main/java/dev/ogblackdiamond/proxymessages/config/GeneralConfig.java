@@ -30,6 +30,10 @@ public class GeneralConfig {
     @Comment(value="for all message options, you can insert a hex code (example: {#ff0066}). Characters after this hex code will turn the color of the code. Multiple hex codes can be used to make a string multicolored.\nyou can also insert tags like {bold} and {italic} to style your messages. Please refer to the documentation for this plugin for more information.\n\nthe default color to be used for a player's name in messages when they have not set one")
     public String defaultPlayerColor = "#fcfcfc";
 
+    @Setting(value="choose-color")
+    @Comment(value="whether or not to allow a player to change their name color")
+    public boolean chooseColor;
+
     @Setting(value="join-message-options")
     @Comment(value="options from this list will be randomly chosen to be displayed when a player joins the network\n{player} will be replaced by the player name")
     public List<String> joinMessageOptions = List.of("{player} joined the network"); 
