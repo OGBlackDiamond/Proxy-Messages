@@ -1,6 +1,7 @@
 package dev.ogblackdiamond.proxymessages;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
@@ -41,7 +42,7 @@ import org.slf4j.Logger;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.5.5",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "3.5.6",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {
@@ -251,6 +252,11 @@ public class ProxyMessages {
 
     @Subscribe
     public void onPlayerMessage(PlayerChatEvent event) {
+
+        // tell the backend whether to cancel messages
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeBoolean(configUtil.generalConfig.globalMessages);
+        event.getPlayer().sendPluginMessage(IDENTIFIER, out.toByteArray());
         
         String serverName = event.getPlayer().getCurrentServer().get().getServerInfo().getName();
 
@@ -298,6 +304,9 @@ public class ProxyMessages {
         sendMessageToServer(message, serverName);
 
     }
+
+
+       
 
 
     private void sendMessage(MessageReturns message, UUID uuid, boolean exceptPlayerServer) {

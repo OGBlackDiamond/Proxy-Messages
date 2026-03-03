@@ -3,13 +3,17 @@ package dev.ogblackdiamond.proxymessages;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.jetbrains.annotations.NotNull;
 
+import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
@@ -19,11 +23,14 @@ import net.kyori.adventure.text.Component;
 /**
  *  Main class for the plugin, sets up the listener and removes default join and leave messages.
  */
-public class ProxyMessages extends JavaPlugin implements Listener {
+public class ProxyMessages extends JavaPlugin implements PluginMessageListener, Listener {
+
+    boolean cancelPlayerMessages = true;
 
     @Override
     public void onEnable() {
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "proxymessages:main");
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, "proxymessages:main", this);
 
         Bukkit.getPluginManager().registerEvents(this, this);
 
@@ -43,6 +50,8 @@ public class ProxyMessages extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onAsyncPlayerChat(AsyncChatEvent event) {
+
+        if (!cancelPlayerMessages) return;
         
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
@@ -57,4 +66,16 @@ public class ProxyMessages extends JavaPlugin implements Listener {
         event.setCancelled(true);
 
     }
+
+
+	@Override
+	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+
+        if (!channel.equalsIgnoreCase("proxymessages:main")) return;
+        
+        ByteArrayDataInput data = ByteStreams.newDataInput(message);
+
+        cancelPlayerMessages = data.readBoolean();
+
+	}
 }
