@@ -9,7 +9,10 @@ import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PluginMessageEvent
+
+
+;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -94,7 +97,7 @@ public class ProxyMessages {
 
         // initialize command stuff
         CommandManager commandManager = server.getCommandManager();
-        
+
         CommandMeta reloadCommandMeta = commandManager.metaBuilder("pmReload")
             .aliases("reloadPM")
             .build();
