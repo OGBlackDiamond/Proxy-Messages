@@ -39,7 +39,6 @@ import dev.ogblackdiamond.proxymessages.commands.SetColor;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -158,7 +157,9 @@ public class ProxyMessages {
 
         // instance our main util classes 
         configUtil = new ConfigUtil(dataDirectory);
-        messageUtil = new MessageUtil(configUtil);
+
+        if (configUtil.generalConfig.enablePapi) messageUtil = new PapiUtil(this, configUtil);
+        else messageUtil = new MessageUtil(configUtil);
 
 
         if (configUtil.discordConfig.discordEnabled) {
@@ -353,7 +354,7 @@ public class ProxyMessages {
         CompletableFuture<String> future = ((PapiUtil) messageUtil).getFuture(data.uniqueID);
 
         if (future != null) {
-            future.completeOnTimeout(data.messageData, 5, TimeUnit.SECONDS);
+            future.complete(data.messageData);
         }
     }
 

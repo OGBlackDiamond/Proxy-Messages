@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -11,7 +12,6 @@ import com.velocitypowered.api.proxy.Player;
 
 import dev.ogblackdiamond.proxymessages.ProxyMessages;
 import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
-import dev.ogblackdiamond.proxymessages.util.MessageType;
 
 public class PapiUtil extends MessageUtil {
 
@@ -36,6 +36,8 @@ public class PapiUtil extends MessageUtil {
 
     private CompletableFuture<String> resolveFutureString(String ogString, Player player) {
         CompletableFuture<String> future = new CompletableFuture<>();
+        future.completeOnTimeout(ogString, 5, TimeUnit.SECONDS);
+
         pending.put(player.getUniqueId(), future);
 
         // build the message
