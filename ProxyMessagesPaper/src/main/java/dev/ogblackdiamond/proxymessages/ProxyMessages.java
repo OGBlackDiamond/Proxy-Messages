@@ -52,7 +52,7 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
     public void onAsyncPlayerChat(AsyncChatEvent event) {
 
         if (!cancelPlayerMessages) return;
-        
+
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
         out.writeUTF(event.getPlayer().getName());
@@ -72,7 +72,7 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
 
         if (!channel.equalsIgnoreCase("proxymessages:main")) return;
-        
+
         ByteArrayDataInput data = ByteStreams.newDataInput(message);
 
         cancelPlayerMessages = data.readBoolean();

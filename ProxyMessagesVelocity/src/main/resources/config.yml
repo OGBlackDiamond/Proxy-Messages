@@ -1,3 +1,22 @@
+#this enables PAPI to be used in message formatting.
+#if this is enabled, PAPI MUST be installed on all backend servers
+enable-papi: false
+
+# ---------------------------------------
+# --- READ THIS BEOFRE CONFIGURING!!! ---
+# ---------------------------------------
+# The sensible defaults in this config are for use with the standalone version of this plugin,
+# meaning it does not use PAPI or any external plugins, it operates by itself.
+
+# If `enable-papi` above is set to true, these defaults will still work, but it is idiomatic to use PAPI format placeholders instead
+# PAPI specific placeholders will be enclosed in `%%` rather than `{}`.
+
+# additionally, the 'optional' paper version of this plugin MUST be installed on all backend servers for external PAPI placeholders to work.
+# it not only improves the UX, but in this case acts as a translation layer between PAPI and my placeholder system
+
+# Please reference the documentation for more information
+# ----------------------------------------
+
 # enables a network-wide join message for when a player joins the network
 global-network-join: true
 
