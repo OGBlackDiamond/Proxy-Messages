@@ -34,17 +34,14 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
     @Override
     public void onEnable() {
 
-
         papiEnabled = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
 
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelMain);
         this.getServer().getMessenger().registerIncomingPluginChannel(this, channelMain, this);
 
-        if (papiEnabled) {
-            this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelPapi);
-            this.getServer().getMessenger().registerIncomingPluginChannel(this, channelPapi, this);
-        }
-        
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelPapi);
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, channelPapi, this);
+
         Bukkit.getPluginManager().registerEvents(this, this);
 
         Bukkit.getLogger().info("[ProxyMessages] Thank you for using ProxyMessages");
