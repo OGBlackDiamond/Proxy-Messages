@@ -25,18 +25,26 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
 
     boolean cancelPlayerMessages = true;
 
+    boolean papiEnabled = false;
+
     private final String channelMain = "proxymessages:main";
     private final String channelPapi = "proxymessages:papi";
 
 
     @Override
     public void onEnable() {
+
+
+        papiEnabled = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
+
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelMain);
         this.getServer().getMessenger().registerIncomingPluginChannel(this, channelMain, this);
 
-        this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelPapi);
-        this.getServer().getMessenger().registerIncomingPluginChannel(this, channelPapi, this);
-
+        if (papiEnabled) {
+            this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelPapi);
+            this.getServer().getMessenger().registerIncomingPluginChannel(this, channelPapi, this);
+        }
+        
         Bukkit.getPluginManager().registerEvents(this, this);
 
         Bukkit.getLogger().info("[ProxyMessages] Thank you for using ProxyMessages");
@@ -86,18 +94,20 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
     }
 
     private void handlePluginMessagePapi(byte[] message, Player player) {
+
         ByteArrayDataInput data = ByteStreams.newDataInput(message);
         String placeholder = data.readUTF();
 
 
-        String newText = PlaceholderAPI.setPlaceholders(player, placeholder);
+        if (papiEnabled)
+            placeholder = PlaceholderAPI.setPlaceholders(player, placeholder);
 
 
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         UUID playerUUID = player.getUniqueId();
         out.writeLong(playerUUID.getLeastSignificantBits());
         out.writeLong(playerUUID.getMostSignificantBits());
-        out.writeUTF(newText);
+        out.writeUTF(placeholder);
 
         player.sendPluginMessage(this, channelPapi, out.toByteArray());
     }

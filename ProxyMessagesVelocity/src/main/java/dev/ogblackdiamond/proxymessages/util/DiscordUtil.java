@@ -199,13 +199,6 @@ public class DiscordUtil implements EventListener {
         return status;
     }
 
-    // returns if the message channel is not null
-    public boolean checkMessageChannel() {
-        boolean channel = messageChannel == null;
-        if (channel) status = "Channel provided could not be found!";
-        return channel;
-    }
-
     @Override
     public void onEvent(GenericEvent event) {
 
@@ -215,8 +208,6 @@ public class DiscordUtil implements EventListener {
         MessageReceivedEvent messageEvent = (MessageReceivedEvent) event;
 
         if (messageEvent.getAuthor().isBot() || messageEvent.getAuthor().isSystem()) return;
-
-        if (!configUtil.discordChatSyncConfig.discordPlayerChatSyncEnabled) return;
 
 
         String channelID = messageEvent.getChannel().getId();
@@ -282,13 +273,13 @@ public class DiscordUtil implements EventListener {
         if (previousColorIndexBuffer == previousColorIndex) return prefix;
 
         // encapsulate the {#FFFFFF} string in the prefix 
-        String previousColor = prefix.substring(previousColorIndexBuffer, previousColorIndexBuffer + 8);
+        String previousColor = prefix.substring(previousColorIndexBuffer, previousColorIndexBuffer + 9);
 
         String redHex = Integer.toHexString(color.getRed());
         String greenHex = Integer.toHexString(color.getGreen());
         String blueHex = Integer.toHexString(color.getBlue());
 
-        String newColor = "{#" + redHex + blueHex + greenHex + "}";
+        String newColor = "{#" + redHex + greenHex + blueHex + "}";
 
         newPrefix = prefix.substring(0, playerPlaceholderIndex) 
             + newColor 
