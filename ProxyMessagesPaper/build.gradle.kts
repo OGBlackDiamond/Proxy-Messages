@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     implementation("org.apache.commons:commons-text")
-    compileOnly("io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.12.2")
 }
 
