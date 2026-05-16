@@ -87,7 +87,7 @@ Once `global-messages` is enabled, players can toggle their messages between "gl
 
 **Local messages** mean that the user's messages will only be displayed in the server they are connected to.
 
-### PlaceholderAPI Support:
+## PlaceholderAPI Support:
 As mentioned above, this plugin supports PlaceholderAPI. This feature is only available for v4.0.0 and up.
 
 When `enable-papi` is `true`, the proxy will attempt to communicate with the **required** paper plugins on the backend to replace placeholders in the proxy config with their actual values.
