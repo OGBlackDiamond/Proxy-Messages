@@ -35,7 +35,9 @@ The paper plugin does everything that the pre-4.0.0 versions did, with the addit
 | `false`     | Optional      | >= 4.0.0               |
 | `true`      | Required      | >= 4.0.0               |
 | N/A         | Optional    | <  4.0.0               |
+
 **Table 1**: Overview of paper plugin requirements
+
 ---
 ### **COLOR**:
 In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code **except player names** will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
