@@ -8,34 +8,52 @@ Join [my Discord!](https://discord.gg/C2PJNTN97u)
 
 ## Key Features:
 * Global messages so players can communicate with one another, even if they aren't connected to the same server.
-* Configurable Messages: Customize join, leave, and server switch messages with ease, tailoring them to fit the tone and style of your server network.
+* Configurable Messages: Customize join, leave, server switch, and player messages with ease, tailoring them to fit the tone and style of your server network.
+* Extendable configuration options: **PlaceholderAPI support!**
 * Multiple Message Variants: Create multiple potential messages for each event, allowing for variety and keeping the experience fresh for your players.
 * Custom Colors with HEX Support: Enhance your messages with custom colors using HEX codes to match your server's branding or aesthetic.
-* Abitility to instate network-wide resource packs.
+* Kyori Adventure TextDecoration: custom text formatting beyond just color!
+* Ability to instate network-wide resource packs.
 * Integration with Discord to keep your sever network connected over discord! 
 
 ### Configuration Overview:
-All configurations are managed on the proxy side, meaning there’s no need to synchronize settings across individual backend servers. Simply edit the `config.yml` file located in `plugins/proxymessages/` on your proxy server to get started.
+All configuration is managed on the proxy side, meaning there’s no need to synchronize settings across individual backend servers. Simply edit the `config.yml` file located in `plugins/proxymessages/` on your proxy server to get started.
 
 ### The Paper Plugin:
-ProxyMessages can work standalone on a velocity server. However, due to limitations in the velocity API, it cannot edit or change the vanilla messages that normally appear on servers. These include the vanilla join and leave messages, as well as vanilla chat messages on the server that the player is connected to. If you'd like remove the vanilla join and leave messages, and format chat messages, please use the provided paper plugin on all of your backend servers. Once the paper plugin is installed, the aforementioned features will automatically start working. No extra configuration is needed.
+The paper plugin's role was extended in version 4.0.0 of this plugin. The versions after 4.0.0 of the paper plugin are not compatible with unversioned ones that came before it.
 
-#### **COLOR**:
+#### Pre 4.0.0
+---
+ProxyMessages can work standalone on a velocity server. However, due to limitations in the velocity API, it cannot edit or change the vanilla messages that normally appear on servers. These include the vanilla join and leave messages, as well as vanilla chat messages on the server that the player is connected to. If you'd like remove the vanilla join and leave messages, and format chat messages, please use the provided paper plugin on all of your backend servers. Once the paper plugin is installed, the aforementioned features will automatically start working. No extra configuration is needed.
+#### 4.0.0 and beyond
+---
+The paper plugin does everything that the pre-4.0.0 versions did, with the addition that they now are a requirement for PlaceholderAPI support. The paper plugin is **required** to be installed on all backend servers if `enable-papi` is true **in the proxy config**. If you do not care for PlaceholderAPI support, ensure that `enable-papi` is set to false, and the paper plugins will be optional. It is still highly recommended, as it improves the user experience. The option is there for you. In the same way as before, no additional configuration is needed on the paper plugin, simply install it. All configuration is still on the velocity plugin.
+
+
+| `enable-papi` | Paper Plugin? | Paper Plugin Version |
+| ----------- | ------------- | -------------------- |
+| `false`     | Optional      | >= 4.0.0               |
+| `true`      | Required      | >= 4.0.0               |
+| N/A         | Optional    | <  4.0.0               |
+**Table 1**: Overview of paper plugin requirements
+---
+### **COLOR**:
 In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code **except player names** will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.
 
-#### **STYLING**
-In all message options, you can use Kyori Adventure TextDecoration options to further style your join options. Options include:
+### **STYLING**
+In all message options, you can use Kyori Adventure TextDecoration options to further style your text. Options include:
 * `{bold}` - text after this tag is bold
 * `{italic}` - text after this tag is italic 
 * `{strike}` - text after this tag has strikethroughs
 * `{underline}` - text after this tag is underlined
 * `{obfuscate}` - text after this tag is obfuscated
 
-Two sets of these tags will "open" and "close" their syle. For example, you can stylize a chunk of text by sandwitching it between the corresponding tags.
+Two sets of these tags will "open" and "close" their style. For example, you can stylize a chunk of text by sandwiching it between the corresponding tags.
 
 
 ### Key Configuration Options:
-* `default-player-color`: The default color for players who havent set a color for their name.
+* `enable-papi`: enable PlaceholderAPI support, see below for more information.
+* `default-player-color`: The default color for players who haven't set a color for their name.
 * `choose-color`: Whether or not players are allowed to set the color of their name.
 * `global-network-join`: Toggle the join message for all users when a player joins the network.
 * `global-network-leave`: Toggle the leave message for all users when a player leaves the network.
@@ -66,6 +84,21 @@ Once `global-messages` is enabled, players can toggle their messages between "gl
 **Global messages** mean that the user's messages will be displayed in the server they are connected to, as well as all other servers on the network.
 
 **Local messages** mean that the user's messages will only be displayed in the server they are connected to.
+
+### PlaceholderAPI Support:
+As mentioned above, this plugin supports PlaceholderAPI. This feature is only available for v4.0.0 and up.
+
+When `enable-papi` is `true`, the proxy will attempt to communicate with the **required** paper plugins on the backend to replace placeholders in the proxy config with their actual values.
+
+ProxyMessages uses it's builtin placeholder system by default, as seen above with the `{}` formatting. These placeholders will still work when `enable-papi` is `true`, and they *should* still be used for the options that they support. The point of PlaceholderAPI support is to extend the existing placeholder system, not replace it.
+
+The placeholders provided by the builtin placeholder will retain the same syntax as before, `{}`, and PlaceholderAPI placeholders will use `%%` to encapsulate it's placeholders. PlaceholderAPI must be installed on every backend server in addition to the paper ProxyMessages plugin.
+
+**The Flow of Data:** The proxy plugin requests the placeholders to be filled by the paper plugin, the paper plugin talks to the local PAPI plugin, and replies to the proxy plugin.
+
+**The Caveat:** Because there is one central configuration with the proxy where placehodlers are defined, this means that, if using PAPI, the placeholders you are using must be available on all of your backend servers. For example, you could do something like `{player} joined {cur} with %rank%`, so long as the `%rank%` placeholder is able to be fulfilled. You could not do something like (This is just to illustrate an example) `{player} joined {cur} with %power%`, for example, because only one of your servers has a superpower plugin, so this placeholder couldn't be completed on the other servers.
+
+If server specific placeholders are something you really want, please message me in discord or open an issue on github and let me know and I can try to work on something for you. Currently, I choose to not support this because part of the philosophy with this plugin is to not have to copy paste a configuration across all of your backend servers. I am open to changing this though, so long as it is optional and off by default. 
 
 ### Resource Packs:
 This section discusses the ability to instate a network-wide resource pack
