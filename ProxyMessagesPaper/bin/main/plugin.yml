@@ -4,3 +4,9 @@ main: dev.ogblackdiamond.proxymessages.ProxyMessages
 description: Paper plugin to interface with Velocity
 author: BlackDiamond
 api-version: '1.21.5'
+
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: BEFORE
+      required: false

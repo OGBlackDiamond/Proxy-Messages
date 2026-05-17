@@ -53,7 +53,7 @@ tasks.jar {
 tasks.shadowJar {
     archiveBaseName.set("ProxyMessagesVelocity")
     archiveClassifier.set("")
-    archiveVersion.set("3.5.6")
+    archiveVersion.set("4.0.0-alpha")
     minimize()
 
     relocate("org.spongepowered.configurate", "dev.ogblackdiamond.libs.configurate")

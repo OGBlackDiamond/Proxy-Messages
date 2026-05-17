@@ -6,19 +6,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.jetbrains.annotations.NotNull;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.Component;
+import me.clip.placeholderapi.PlaceholderAPI;
 
 /**
  *  Main class for the plugin, sets up the listener and removes default join and leave messages.
@@ -27,10 +25,22 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
 
     boolean cancelPlayerMessages = true;
 
+    boolean papiEnabled = false;
+
+    private final String channelMain = "proxymessages:main";
+    private final String channelPapi = "proxymessages:papi";
+
+
     @Override
     public void onEnable() {
-        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "proxymessages:main");
-        this.getServer().getMessenger().registerIncomingPluginChannel(this, "proxymessages:main", this);
+
+        papiEnabled = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
+
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelMain);
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, channelMain, this);
+
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, channelPapi);
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, channelPapi, this);
 
         Bukkit.getPluginManager().registerEvents(this, this);
 
@@ -52,16 +62,15 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
     public void onAsyncPlayerChat(AsyncChatEvent event) {
 
         if (!cancelPlayerMessages) return;
-        
+
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
-        out.writeUTF(event.getPlayer().getName());
         UUID playerUUID = event.getPlayer().getUniqueId();
         out.writeLong(playerUUID.getLeastSignificantBits());
         out.writeLong(playerUUID.getMostSignificantBits());
         out.writeUTF(event.signedMessage().message());
 
-        event.getPlayer().sendPluginMessage(this, "proxymessages:main", out.toByteArray());
+        event.getPlayer().sendPluginMessage(this, channelMain, out.toByteArray());
 
         event.setCancelled(true);
 
@@ -71,11 +80,33 @@ public class ProxyMessages extends JavaPlugin implements PluginMessageListener, 
 	@Override
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
 
-        if (!channel.equalsIgnoreCase("proxymessages:main")) return;
-        
-        ByteArrayDataInput data = ByteStreams.newDataInput(message);
-
-        cancelPlayerMessages = data.readBoolean();
+        if (channel.equalsIgnoreCase(channelMain)) handlePluginMessageMain(message);
+        else if (channel.equalsIgnoreCase(channelPapi)) handlePluginMessagePapi(message, player);
 
 	}
+
+    private void handlePluginMessageMain(byte[] message) {
+        ByteArrayDataInput data = ByteStreams.newDataInput(message);
+        cancelPlayerMessages = data.readBoolean();
+    }
+
+    private void handlePluginMessagePapi(byte[] message, Player player) {
+
+        ByteArrayDataInput data = ByteStreams.newDataInput(message);
+        String placeholder = data.readUTF();
+
+
+        if (papiEnabled)
+            placeholder = PlaceholderAPI.setPlaceholders(player, placeholder);
+
+
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        UUID playerUUID = player.getUniqueId();
+        out.writeLong(playerUUID.getLeastSignificantBits());
+        out.writeLong(playerUUID.getMostSignificantBits());
+        out.writeUTF(placeholder);
+
+        player.sendPluginMessage(this, channelPapi, out.toByteArray());
+    }
+
 }

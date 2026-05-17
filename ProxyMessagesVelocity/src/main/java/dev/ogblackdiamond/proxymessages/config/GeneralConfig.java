@@ -10,57 +10,84 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public class GeneralConfig {
 
-    @Setting(value="global-network-join")
-    @Comment(value="enables a network-wide join message for when a player joins the network")  
+    @Setting(value = "enable-papi")
+    @Comment(value = """
+            this enables PAPI to be used in message formatting.
+            if this is enabled, PAPI MUST be installed on all backend servers
+            """)
+    public boolean enablePapi = false;
+
+    @Setting(value = "global-network-join")
+    @Comment(value = """
+            ---------------------------------------
+            --- READ THIS BEOFRE CONFIGURING!!! ---
+            ---------------------------------------
+            ProxyMessages has a builtin placeholder system so it doesn't require any dependencies by default.
+            PAPI integration can optionally extend the existing placeholder system so external placeholders can be used.
+
+            The builtin placeholders are surrounded with `{}`, and each configuration option will detail the usable placeholders for that option.
+
+            If `enable-papi` above is set to true, the builtin placeholder system will still work, but it is idiomatic to use PAPI format placeholders instead where possible
+            When PAPI is enabled, use the builtin placeholder system for all things related to this plugin,
+            such as server information, text coloring, and text formatting. Use PAPI for everything else.
+
+            PAPI specific placeholders will be enclosed in the standard `%%` rather than `{}` for the builtin.
+
+            additionally, the 'optional' paper version of this plugin MUST be installed on all backend servers for external PAPI placeholders to work.
+            it not only improves the UX, but in this case acts as a translation layer between PAPI and my placeholder system
+
+            Please reference the documentation for more information
+            ----------------------------------------
+
+            enables a network-wide join message for when a player joins the network
+            """)
     public boolean globalNetworkJoin = true;
 
-    @Setting(value="global-network-leave")
-    @Comment(value="enables a network-wide leave message for when a player leaves the network")
+    @Setting(value = "global-network-leave")
+    @Comment(value = "enables a network-wide leave message for when a player leaves the network")
     public boolean globalNetworkLeave = true;
 
-    @Setting(value="global-network-switch")
-    @Comment(value="enables a network-wide message that notifies players when a player switches between servers when true global-network-switch: true")
+    @Setting(value = "global-network-switch")
+    @Comment(value = "enables a network-wide message that notifies players when a player switches between servers when true")
     public boolean globalNetworkSwitch = true;
 
-    @Setting(value="global-messages")
-    @Comment(value="enables a network-wide messaging system that allows players to communicate between servers on the proxy")
+    @Setting(value = "global-messages")
+    @Comment(value = "enables a network-wide messaging system that allows players to communicate between servers on the proxy")
     public boolean globalMessages = true;
 
-    @Setting(value="default-player-color")
-    @Comment(value="for all message options, you can insert a hex code (example: {#ff0066}). Characters after this hex code will turn the color of the code. Multiple hex codes can be used to make a string multicolored.\nyou can also insert tags like {bold} and {italic} to style your messages. Please refer to the documentation for this plugin for more information.\n\nthe default color to be used for a player's name in messages when they have not set one")
+    @Setting(value = "default-player-color")
+    @Comment(value = "for all message options, you can insert a hex code (example: {#ff0066}). Characters after this hex code will turn the color of the code. Multiple hex codes can be used to make a string multicolored.\nyou can also insert tags like {bold} and {italic} to style your messages. Please refer to the documentation for this plugin for more information.\n\nthe default color to be used for a player's name in messages when they have not set one")
     public String defaultPlayerColor = "#fcfcfc";
 
-    @Setting(value="choose-color")
-    @Comment(value="whether or not to allow a player to change their name color")
+    @Setting(value = "choose-color")
+    @Comment(value = "whether or not to allow a player to change their name color")
     public boolean chooseColor;
 
-    @Setting(value="join-message-options")
-    @Comment(value="options from this list will be randomly chosen to be displayed when a player joins the network\n{player} will be replaced by the player name")
-    public List<String> joinMessageOptions = List.of("{player} joined the network"); 
+    @Setting(value = "join-message-options")
+    @Comment(value = "options from this list will be randomly chosen to be displayed when a player joins the network\n{player} will be replaced by the player name")
+    public List<String> joinMessageOptions = List.of("{player} joined the network");
 
-    @Setting(value="leave-message-options")
-    @Comment(value="options from this list will be randomly chosen to be displayed when a player joins the network\n{player} will be replaced by the player name")
+    @Setting(value = "leave-message-options")
+    @Comment(value = "options from this list will be randomly chosen to be displayed when a player joins the network\n{player} will be replaced by the player name")
     public List<String> leaveMessageOptions = List.of("{player} left the network");
 
-    @Setting(value="switch-message-options")
-    @Comment(value="options from this list will be randomly chosen to be displayed when a player changes between two servers on the network \n{player} will be replaced by the player name\n{prev} will be replaced by the server the player is connecting from\n{cur} will be replaced by the server the player is connecting to")
+    @Setting(value = "switch-message-options")
+    @Comment(value = "options from this list will be randomly chosen to be displayed when a player changes between two servers on the network \n{player} will be replaced by the player name\n{prev} will be replaced by the server the player is connecting from\n{cur} will be replaced by the server the player is connecting to")
     public List<String> switchMessageOptions = List.of("{player} left {prev} and joined {cur}");
 
-    @Setting(value="global-message-prefix")
-    @Comment(value="the prefix to global messages on other servers\n{cur} will be replaced by the current server\n{player} will be replaced by the player's name")
+    @Setting(value = "global-message-prefix")
+    @Comment(value = "the prefix to global messages on other servers\n{cur} will be replaced by the current server\n{player} will be replaced by the player's name")
     public String globalMessagePrefix = "[{cur}] - {player}: ";
 
-    @Setting(value="global-message-default")
-    @Comment(value="whether player's messages will be global by default")
+    @Setting(value = "global-message-default")
+    @Comment(value = "whether player's messages will be global by default")
     public boolean globalMessageDefault = true;
 
-    @Setting(value="network-resource-pack")
-    @Comment(value="options for a network-wide resource pack")
+    @Setting(value = "network-resource-pack")
+    @Comment(value = "options for a network-wide resource pack")
     private ConfigurationNode networkResourcePackNode;
 
-    @Setting(value="discord")
-    @Comment(value="options for discord integration")
+    @Setting(value = "discord")
+    @Comment(value = "options for discord integration")
     private ConfigurationNode discordNode;
 }
-
-

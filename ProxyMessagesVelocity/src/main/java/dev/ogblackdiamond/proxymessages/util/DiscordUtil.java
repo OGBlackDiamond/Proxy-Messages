@@ -15,6 +15,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import dev.ogblackdiamond.proxymessages.ProxyMessages;
 import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
+import dev.ogblackdiamond.proxymessages.util.MessageType;
 import dev.ogblackdiamond.proxymessages.util.MessageUtil.MessageReturns;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -66,7 +67,7 @@ public class DiscordUtil implements EventListener {
             status = "Invalid image file provided!";
             imageExists = false;
         }
-       
+
         // load and validate colors from config
         if(!HexUtil.isValidHex(configUtil.discordConfig.discordJoinColor)){
             joinColor = Color.decode("#00FF00");
@@ -90,12 +91,12 @@ public class DiscordUtil implements EventListener {
             .addEventListeners(this)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
             .build();
-        
+
         try {
             jda.awaitReady();
         } catch (InterruptedException e) { }
 
-        
+
         // a null check should be be performed in another class after construction
         messageChannel = jda.getChannelById(TextChannel.class, configUtil.discordConfig.discordProxyChannelID);
 
@@ -177,27 +178,18 @@ public class DiscordUtil implements EventListener {
 
     // handles sending messages when player action happens on the proxy
     public void playerNotification(MessageUtil.MessageReturns message, UUID uuid) {
-        Color messageColor = new Color(20, 20, 200);
-        switch(message.getType()) {
-            case "join": {
-                messageColor = joinColor;
-                break;
-            }
-            case "leave": {
-                messageColor = leaveColor;
-                break;
-            }
-            case "switch":{
-                messageColor = switchColor;
-                break;
-            }
-            default: {
-                return;
-            }
-        }
+        Color messageColor = switch (message.type()) {
+            case JOIN -> joinColor;
+            case LEAVE -> leaveColor;
+            case SWITCH -> switchColor;
+            default -> null;
+        };
+
+        if (messageColor == null) return;
+
         EmbedBuilder builder = new EmbedBuilder()
             .setColor(messageColor)
-            .setAuthor(message.getString(), "https://github.com/OGBlackDiamond/Proxy-Messages", "https://crafthead.net/avatar/" + uuid.toString());
+            .setAuthor(message.string(), "https://github.com/OGBlackDiamond/Proxy-Messages", "https://crafthead.net/avatar/" + uuid.toString());
 
         messageChannel.sendMessageEmbeds(builder.build()).complete();
     }
@@ -205,13 +197,6 @@ public class DiscordUtil implements EventListener {
     // returns the status of this object
     public String getStatus() {
         return status;
-    }
-
-    // returns if the message channel is not null
-    public boolean checkMessageChannel() {
-        boolean channel = messageChannel == null;
-        if (channel) status = "Channel provided could not be found!";
-        return channel;
     }
 
     @Override
@@ -224,8 +209,6 @@ public class DiscordUtil implements EventListener {
 
         if (messageEvent.getAuthor().isBot() || messageEvent.getAuthor().isSystem()) return;
 
-        if (!configUtil.discordChatSyncConfig.discordPlayerChatSyncEnabled) return;
-
 
         String channelID = messageEvent.getChannel().getId();
 
@@ -236,37 +219,39 @@ public class DiscordUtil implements EventListener {
                 prefix,
                 messageEvent.getMember().getColor()
             );
-
         }
 
         // compile the message
-        MessageReturns message = messageUtil.compileFormattedMessage(
-            "",
+        // we have to pass the name of the user in as the type.
+        // because we have the "fromDiscord" flag, we can correct this and prevent null errors
+        messageUtil.compileFormattedMessage(
+            MessageType.NONE,
+            null,
             messageEvent.getAuthor().getEffectiveName(),
-            "",
             "Discord",
             prefix + messageEvent.getMessage().getContentRaw(),
             true
-        );
+        ).thenAccept(compiled -> {
 
-
-        // sends the message globally if it's in the global channel
-        if (configUtil.discordConfig.discordProxyChannelID.equals(channelID)) {
-            proxyMessages.sendMessage(message);
-            return;
-        }
-
-        // I know this is stupid but I dont really care :)
-        // why are you reading my code?
-        int i = 0;
-        for (TextChannel channel : serverNameIDPairs.values()) {
-            if (channel.getId().equals(channelID)) {
-                Object serverNames[] = serverNameIDPairs.keySet().toArray();
-                proxyMessages.sendMessageToServer(message, serverNames[i].toString());
-                break;
+            // sends the message globally if it's in the global channel
+            if (configUtil.discordConfig.discordProxyChannelID.equals(channelID)) {
+                proxyMessages.sendMessage(compiled);
+                return;
             }
-            i++;
-        }
+
+            // I know this is stupid but I dont really care :)
+            // why are you reading my code?
+            int i = 0;
+            for (TextChannel channel : serverNameIDPairs.values()) {
+                if (channel.getId().equals(channelID)) {
+                    Object serverNames[] = serverNameIDPairs.keySet().toArray();
+                    proxyMessages.sendMessageToServer(compiled, serverNames[i].toString());
+                    break;
+                }
+                i++;
+            }
+
+        });
     }
 
     private String colorPrefix(String prefix, Color color) {
@@ -288,13 +273,13 @@ public class DiscordUtil implements EventListener {
         if (previousColorIndexBuffer == previousColorIndex) return prefix;
 
         // encapsulate the {#FFFFFF} string in the prefix 
-        String previousColor = prefix.substring(previousColorIndexBuffer, previousColorIndexBuffer + 8);
+        String previousColor = prefix.substring(previousColorIndexBuffer, previousColorIndexBuffer + 9);
 
         String redHex = Integer.toHexString(color.getRed());
         String greenHex = Integer.toHexString(color.getGreen());
         String blueHex = Integer.toHexString(color.getBlue());
 
-        String newColor = "{#" + redHex + blueHex + greenHex + "}";
+        String newColor = "{#" + redHex + greenHex + blueHex + "}";
 
         newPrefix = prefix.substring(0, playerPlaceholderIndex) 
             + newColor 

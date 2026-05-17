@@ -1,5 +1,10 @@
 package dev.ogblackdiamond.proxymessages.util;
 
+import java.util.concurrent.CompletableFuture;
+
+import com.velocitypowered.api.proxy.Player;
+import dev.ogblackdiamond.proxymessages.util.MessageType;
+
 import dev.ogblackdiamond.proxymessages.config.ConfigUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -38,7 +43,16 @@ public class MessageUtil {
     }
 
     // compiles the message, interpolating correct strings when needed.
-    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString, boolean fromDiscord) {
+    public CompletableFuture<MessageReturns> compileFormattedMessage(MessageType type, Player player, String previousServer, String newServer, String ogString, boolean fromDiscord) {
+
+        String playerName;
+
+        if (fromDiscord) {
+            playerName = previousServer;
+            previousServer = "";
+        }
+        else playerName = player.getUsername();
+
 
         String chosenMessage = ogString;
         String finalString = "";
@@ -46,7 +60,7 @@ public class MessageUtil {
 
         // inject the custom player name color
         int playerStrLocation = ogString.indexOf(playerStr);
-        
+
         if (playerStrLocation != -1 || !fromDiscord) {
 
             int previousColorLocation = ogString.indexOf("{#");
@@ -98,21 +112,21 @@ public class MessageUtil {
         return compileColoredMessage(finalString, type);
     }
 
-    public MessageReturns compileFormattedMessage(String type, String playerName, String previousServer, String newServer, String ogString) {
+    public CompletableFuture<MessageReturns> compileFormattedMessage(MessageType type, Player player, String previousServer, String newServer, String ogString) {
         return compileFormattedMessage(
-            type, playerName, previousServer, newServer, ogString, false
+            type, player, previousServer, newServer, ogString, false
         );
     }
 
 
 
 
-    public MessageReturns compileColoredMessage(String coloredString) {
-        return compileColoredMessage(coloredString, "");
+    public CompletableFuture<MessageReturns> compileColoredMessage(String coloredString) {
+        return compileColoredMessage(coloredString, MessageType.NONE);
     }
 
     // removes and applies hex code coloring to the given string, returns a custom MessageReturns object
-    public MessageReturns compileColoredMessage(String coloredString, String type) {
+    public CompletableFuture<MessageReturns> compileColoredMessage(String coloredString, MessageType type) {
 
         TextComponent.Builder finalMessage = Component.text();
         TextColor textColor = defaultTextColor;
@@ -126,7 +140,7 @@ public class MessageUtil {
         String finalString = "";
 
         for (int i = 0; i < coloredString.length(); i++) {
-    
+
             boolean atColorLength = i + colorLength > coloredString.length();
 
             boolean atBoldLengh = i + boldLength > coloredString.length();
@@ -145,7 +159,7 @@ public class MessageUtil {
             } else if (!atItalicLength && coloredString.substring(i, i + italicLength).equals(italicStr)) {
                 isItalic = !isItalic;
                 i += italicLength - 1;
-            } else if (!atStrikeLength && coloredString.substring(i, i + strikeLength).equals(italicStr)) {
+            } else if (!atStrikeLength && coloredString.substring(i, i + strikeLength).equals(strikeStr)) {
                 isStrike = !isStrike;
                 i += strikeLength - 1;
             } else if (!atUnderlineLength && coloredString.substring(i, i + underlineLength).equals(underlineStr)) {
@@ -168,36 +182,19 @@ public class MessageUtil {
 
         }
 
-        return new MessageReturns(finalMessage.build(), finalString, type); 
+
+        MessageReturns result = new MessageReturns(finalMessage.build(), finalString, type); 
+
+        return CompletableFuture.completedFuture(result);
     }
 
-    /* 
-     * A simple class with two datatypes to return a string and it's component counterpart
+    /*
+     * A simple class with three datatypes
+     * a string
+     * it's component counterpart
+     * it's type (used for discord embed color selection)
      */
-    public class MessageReturns {
-
-        private Component component;
-        private String string;
-        private String type;
-
-        public MessageReturns(Component component, String string, String type) {
-            this.component = component;
-            this.string = string;
-            this.type = type;
-        }
-
-        public Component getComponent() {
-            return component;
-        }
-
-        public String getString() {
-            return string;
-        }
-
-        public String getType() {
-            return type;
-        }
-    }
+    public record MessageReturns(Component component, String string, MessageType type) {}
 }
 
 
