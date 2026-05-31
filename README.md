@@ -38,6 +38,20 @@ The paper plugin does everything that the pre-4.0.0 versions did, with the addit
 
 **Table 1**: Overview of paper plugin requirements
 
+#### Modded Servers (Fabric / NeoForge)
+---
+For Fabric and NeoForge backend servers, companion mods are provided: **ProxyMessagesFabric** and **ProxyMessagesNeoForge**. They do the same job as the paper plugin — suppressing vanilla join and leave messages and forwarding chat to the proxy — and require no additional configuration. Simply drop them into your server's mods folder.
+
+There is one important caveat: PlaceholderAPI does not exist on Fabric or NeoForge. If any backend server on your network is running either platform, **`enable-papi` must be set to `false`** in your proxy config.
+
+| Backend | Companion Mod | PAPI Support |
+| ------- | ------------- | ------------ |
+| Paper | ProxyMessagesPaper (see Table 1) | Yes |
+| Fabric | ProxyMessagesFabric (recommended) | No |
+| NeoForge | ProxyMessagesNeoForge (recommended) | No |
+
+**Table 2**: Backend platform overview
+
 ---
 ### **COLOR**:
 In all message options, you can insert a hex code inside brackets (example: `{#ff0066}`). All text after the hex code **except player names** will be turned into that color. You can use this multiple times in one string for a multicolored message. Default color for all text is yellow.

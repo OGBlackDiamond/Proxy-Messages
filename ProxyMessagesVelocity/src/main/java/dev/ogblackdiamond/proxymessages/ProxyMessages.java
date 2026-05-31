@@ -48,7 +48,7 @@ import org.slf4j.Logger;
 /**
  * Main class for ProxyMessages.
  */
-@Plugin(id = "proxymessages", name = "ProxyMessages", version = "4.0.0-alpha",
+@Plugin(id = "proxymessages", name = "ProxyMessages", version = "4.0.0",
     description = "A message system for servers to interact over a proxy.", 
     authors = {"BlackDiamond"})
 public class ProxyMessages {

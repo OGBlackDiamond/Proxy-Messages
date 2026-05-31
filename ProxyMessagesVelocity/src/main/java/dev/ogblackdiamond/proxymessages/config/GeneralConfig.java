@@ -14,6 +14,7 @@ public class GeneralConfig {
     @Comment(value = """
             this enables PAPI to be used in message formatting.
             if this is enabled, PAPI MUST be installed on all backend servers
+            note: PAPI is not supported on Fabric or NeoForge - keep this false if any of your backends are modded
             """)
     public boolean enablePapi = false;
 
@@ -35,6 +36,7 @@ public class GeneralConfig {
 
             additionally, the 'optional' paper version of this plugin MUST be installed on all backend servers for external PAPI placeholders to work.
             it not only improves the UX, but in this case acts as a translation layer between PAPI and my placeholder system
+            for Fabric or NeoForge backends, use the corresponding companion mod instead - note that PAPI is not supported on those platforms
 
             Please reference the documentation for more information
             ----------------------------------------

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "proxymessages",
+  "version": "${version}",
+  "name": "ProxyMessages",
+  "description": "Fabric companion mod for the ProxyMessages Velocity plugin.",
+  "authors": ["BlackDiamond"],
+  "environment": "server",
+  "entrypoints": {
+    "main": ["dev.ogblackdiamond.proxymessages.ProxyMessagesFabric"]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.20.1"
+  }
+}
