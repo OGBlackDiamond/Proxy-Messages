@@ -29,7 +29,7 @@ application {
 
 tasks.jar {
     archiveBaseName.set("ProxyMessagesPaper")
-    archiveVersion.set("4.0.0-alpha")
+    archiveVersion.set("4.0.1")
     manifest {
         attributes["Main-Class"] = application.mainClass
     }
